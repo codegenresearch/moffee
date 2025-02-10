@@ -1,29 +1,16 @@
-from typing import List, Tuple
+from typing import List
 import os
 from jinja2 import Environment, FileSystemLoader
-from moffee.compositor import Page, PageOption, composite, parse_frontmatter
+from moffee.compositor import Page, composite, parse_frontmatter
 from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
-import re
 
-DEFAULT_SLIDE_WIDTH = 1920
-DEFAULT_SLIDE_HEIGHT = 1080
-ASPECT_RATIO = 16 / 9
-
-def validate_dimensions(width: int, height: int) -> bool:
-    """Validate that the dimensions match the aspect ratio."""
-    return abs(width / height - ASPECT_RATIO) < 0.01
-
-def read_options(document_path) -> PageOption:
-    """Read frontmatter options from the document path and validate slide dimensions."""
+def read_options(document_path) -> dict:
+    """Read frontmatter options from the document path"""
     with open(document_path, "r") as f:
         document = f.read()
     _, options = parse_frontmatter(document)
-    
-    if not validate_dimensions(options.styles.get('width', DEFAULT_SLIDE_WIDTH), options.styles.get('height', DEFAULT_SLIDE_HEIGHT)):
-        raise ValueError("Slide dimensions do not match the required aspect ratio.")
-    
     return options
 
 def retrieve_structure(pages: List[Page]) -> dict:
@@ -78,6 +65,7 @@ def render_jinja2(document: str, template_dir) -> str:
     pages = composite(document)
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
+    options = parse_frontmatter(document)[1]
 
     data = {
         "title": title,
@@ -93,6 +81,8 @@ def render_jinja2(document: str, template_dir) -> str:
             }
             for page in pages
         ],
+        "slide_width": options.get('styles', {}).get('width', 1920),
+        "slide_height": options.get('styles', {}).get('height', 1080),
     }
 
     return template.render(data)
