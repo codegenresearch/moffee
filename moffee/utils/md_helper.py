@@ -1,9 +1,10 @@
 import os
 from urllib.parse import urljoin, urlparse
 import re
+from typing import Optional
 
 
-def is_comment(line):
+def is_comment(line: str) -> bool:
     """
     Determines if a given line is a Markdown comment.
     Markdown comments are in the format <!-- comment -->
@@ -14,7 +15,7 @@ def is_comment(line):
     return bool(re.match(r"^\s*<!--.*-->\s*$", line))
 
 
-def get_header_level(line):
+def get_header_level(line: str) -> int:
     """
     Determines the header level of a given line.
 
@@ -22,10 +23,12 @@ def get_header_level(line):
     :return: The header level (1-6) if it's a header, 0 otherwise
     """
     match = re.match(r"^(#{1,6})\s", line)
-    return len(match.group(1)) if match else 0
+    if match:
+        return len(match.group(1))
+    return 0
 
 
-def is_empty(line):
+def is_empty(line: str) -> bool:
     """
     Determines if a given line is an empty line in markdown.
     A line is empty if it is blank or comment only
@@ -33,10 +36,10 @@ def is_empty(line):
     :param line: The line to check
     :return: True if the line is empty, False otherwise
     """
-    return is_comment(line) or not line.strip()
+    return is_comment(line) or line.strip() == ""
 
 
-def is_divider(line, type=None):
+def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     Determines if a given line is a Markdown divider (horizontal rule).
     Markdown dividers are three or more '<->' for horizontal or '===' for vertical,
@@ -64,7 +67,7 @@ def is_divider(line, type=None):
     return False
 
 
-def contains_image(line):
+def contains_image(line: str) -> bool:
     """
     Determines if a given line contains a Markdown image.
     Markdown images are in the format ![alt text](image_url)
@@ -75,7 +78,7 @@ def contains_image(line):
     return bool(re.search(r"!\[.*?\]\(.*?\)", line))
 
 
-def contains_deco(line):
+def contains_deco(line: str) -> bool:
     """
     Determines if a given line contains a deco (custom decorator).
     Decos are in the format @(key1=value1, key2=value2, ...)
@@ -86,7 +89,7 @@ def contains_deco(line):
     return bool(re.match(r"^\s*@\(.*?\)\s*$", line))
 
 
-def extract_title(document):
+def extract_title(document: str) -> Optional[str]:
     """
     Extracts proper title from document.
     The title should be the first-occurred level 1 or 2 heading.
@@ -98,7 +101,7 @@ def extract_title(document):
     return match.group(2).strip() if match else None
 
 
-def rm_comments(document):
+def rm_comments(document: str) -> str:
     """
     Remove comments from markdown. Supports HTML comments and "%%" comments.
 
