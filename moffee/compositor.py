@@ -12,9 +12,9 @@ from moffee.utils.md_helper import (
 )
 
 
+DEFAULT_ASPECT_RATIO = "16:9"
 DEFAULT_SLIDE_WIDTH = 720
 DEFAULT_SLIDE_HEIGHT = 405
-DEFAULT_ASPECT_RATIO = "16:9"
 
 
 @dataclass
@@ -26,27 +26,26 @@ class PageOption:
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
-    width: int = DEFAULT_SLIDE_WIDTH
-    height: int = DEFAULT_SLIDE_HEIGHT
+    slide_width: int = DEFAULT_SLIDE_WIDTH
+    slide_height: int = DEFAULT_SLIDE_HEIGHT
     aspect_ratio: str = DEFAULT_ASPECT_RATIO
 
     def __post_init__(self):
         self.validate_aspect_ratio()
 
     def validate_aspect_ratio(self):
-        try:
-            width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
-            if width_ratio <= 0 or height_ratio <= 0:
-                raise ValueError("Aspect ratio dimensions must be positive integers.")
-        except ValueError:
+        if not re.match(r"^\d+:\d+$", self.aspect_ratio):
             raise ValueError("Aspect ratio error: must be in the format 'width:height' with positive integers.")
+        width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
+        if width_ratio <= 0 or height_ratio <= 0:
+            raise ValueError("Aspect ratio dimensions must be positive integers.")
 
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
         width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
         total_ratio = width_ratio + height_ratio
-        width = (self.width * width_ratio) // total_ratio
-        height = (self.height * height_ratio) // total_ratio
+        width = (self.slide_width * width_ratio) // total_ratio
+        height = (self.slide_height * height_ratio) // total_ratio
         return width, height
 
 
@@ -69,7 +68,7 @@ class Alignment:
 
 @dataclass
 class Chunk:
-    paragraph: Optional[str] = None
+    paragraph: str = ""
     children: Optional[List["Chunk"]] = field(default_factory=list)  # List of chunks
     direction: Direction = Direction.HORIZONTAL
     type: Type = Type.PARAGRAPH
