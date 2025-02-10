@@ -25,7 +25,8 @@ def get_header_level(line: str) -> int:
     match = re.match(r"^(#{1,6})\s", line)
     if match:
         return len(match.group(1))
-    return 0
+    else:
+        return 0
 
 
 def is_empty(line: str) -> bool:
@@ -97,7 +98,8 @@ def extract_title(document: str) -> Optional[str]:
     :param document: The document in markdown
     :return: title if there is one, otherwise None
     """
-    match = re.search(r"^(#|##)\s+(.*?)(?:\n|$)", document, re.MULTILINE)
+    heading_pattern = r"^(#|##)\s+(.*?)(?:\n|$)"
+    match = re.search(heading_pattern, document, re.MULTILINE)
     return match.group(2).strip() if match else None
 
 
