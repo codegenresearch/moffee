@@ -136,7 +136,7 @@ Content 4
 def test_escaped_area_paging():
     doc = """
 Content 1
-bash
+
 ---
 Content 2
 
@@ -152,7 +152,7 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-bash
+
 ***
 Content 3
 
@@ -206,7 +206,8 @@ Paragraph 4
     chunk = pages[0].chunk
     assert chunk.type == Type.NODE
     assert len(chunk.children) == 4
-    assert chunk.children[0].type == Type.PARAGRAPH
+    for child in chunk.children:
+        assert child.type == Type.PARAGRAPH
 
 
 def test_chunking_vertical():
@@ -221,7 +222,8 @@ Paragraph 2
     assert chunk.type == Type.NODE
     assert len(chunk.children) == 2
     assert chunk.direction == Direction.VERTICAL
-    assert chunk.children[0].type == Type.PARAGRAPH
+    for child in chunk.children:
+        assert child.type == Type.PARAGRAPH
 
 
 def test_chunking_horizontal():
@@ -237,7 +239,8 @@ Paragraph 2
     assert chunk.type == Type.NODE
     assert len(chunk.children) == 3
     assert chunk.direction == Direction.HORIZONTAL
-    assert chunk.children[0].type == Type.PARAGRAPH
+    for child in chunk.children:
+        assert child.type == Type.PARAGRAPH
 
 
 def test_chunking_hybrid():
@@ -264,6 +267,8 @@ Paragraph 4
     next_chunk = chunk.children[1]
     assert next_chunk.direction == Direction.HORIZONTAL
     assert len(next_chunk.children) == 3
+    for child in next_chunk.children:
+        assert child.type == Type.PARAGRAPH
 
 
 def test_empty_lines_handling():
@@ -318,7 +323,7 @@ Hello
 def test_divider_handling_in_escaped_area():
     doc = """
 Content 1
-bash
+
 ---
 Content 2
 ---
@@ -327,15 +332,16 @@ Content 3
 Content 4
 ---
 Content 5
+
 """
     pages = composite(doc)
-    assert len(pages) == 2
+    assert len(pages) == 1
 
 
 def test_divider_handling_in_escaped_area_with_multiple_types():
     doc = """
 Content 1
-bash
+
 ---
 Content 2
 ===
@@ -346,9 +352,10 @@ Content 4
 Content 5
 ---
 Content 6
+
 """
     pages = composite(doc)
-    assert len(pages) == 2
+    assert len(pages) == 1
 
 
 if __name__ == "__main__":
