@@ -332,6 +332,7 @@ Content 3
 Content 4
 ---
 Content 5
+
 """
     pages = composite(doc)
     assert len(pages) == 1
@@ -351,6 +352,7 @@ Content 4
 Content 5
 ---
 Content 6
+
 """
     pages = composite(doc)
     assert len(pages) == 1
