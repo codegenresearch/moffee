@@ -1,5 +1,5 @@
 import pytest
-from moffee.compositor import composite, Direction, Type, rm_comments
+from moffee.compositor import composite, Direction, Type
 
 
 @pytest.fixture
@@ -122,7 +122,7 @@ Content 3
 def test_escaped_area_paging():
     doc = """
 Content 1
-bash
+
 ---
 Content 2
 
@@ -138,7 +138,7 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-bash
+
 ---
 Content 3
 
