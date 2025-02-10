@@ -1,12 +1,12 @@
 from typing import List
 import os
 from jinja2 import Environment, FileSystemLoader
-from moffee.compositor import Page, PageOption, composite, parse_frontmatter
+from moffee.compositor import Page, composite, parse_frontmatter
 from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
 
-def read_options(document_path: str) -> PageOption:
+def read_options(document_path):
     """Read frontmatter options from the document path."""
     with open(document_path, "r") as f:
         document = f.read()
@@ -54,7 +54,7 @@ def retrieve_structure(pages: List[Page]) -> dict:
 
 def render_jinja2(document: str, template_dir: str) -> str:
     """Render document using Jinja2 template."""
-    # Setup Jinja 2 environment and load template
+    # Setup Jinja2 environment and load template
     env = Environment(loader=FileSystemLoader(template_dir))
     env.filters["markdown"] = md
     template = env.get_template("index.html")
@@ -64,6 +64,7 @@ def render_jinja2(document: str, template_dir: str) -> str:
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
     _, options = parse_frontmatter(document)
+    width, height = options.computed_slide_size
 
     # Prepare data for template rendering
     data = {
@@ -80,16 +81,14 @@ def render_jinja2(document: str, template_dir: str) -> str:
             }
             for page in pages
         ],
-        "slide_width": options.computed_slide_size[0],
-        "slide_height": options.computed_slide_size[1],
+        "slide_width": width,
+        "slide_height": height,
     }
 
     # Render the template with the prepared data
     return template.render(data)
 
-def build(
-    document_path: str, output_dir: str, template_dir: str, theme_dir: str = None
-):
+def build(document_path: str, output_dir: str, template_dir: str, theme_dir: str = None):
     """Render document, create output directories and write result html."""
     with open(document_path) as f:
         document = f.read()
