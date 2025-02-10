@@ -36,14 +36,17 @@ class PageOption:
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
         """Returns the computed slide size as a tuple (width, height)."""
-        width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
-        calculated_aspect_ratio = width_ratio / height_ratio
-        if calculated_aspect_ratio < MIN_ASPECT_RATIO or calculated_aspect_ratio > MAX_ASPECT_RATIO:
-            raise ValueError(
-                f"Unsupported aspect ratio: {calculated_aspect_ratio}. "
-                f"Please use an aspect ratio between {MIN_ASPECT_RATIO} (4:3) and {MAX_ASPECT_RATIO} (16:9)."
-            )
-        return self.slide_width, self.slide_height
+        try:
+            width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
+            calculated_aspect_ratio = width_ratio / height_ratio
+            if calculated_aspect_ratio < MIN_ASPECT_RATIO or calculated_aspect_ratio > MAX_ASPECT_RATIO:
+                raise ValueError(
+                    f"Unsupported aspect ratio: {calculated_aspect_ratio}. "
+                    f"Please use an aspect ratio between {MIN_ASPECT_RATIO} (4:3) and {MAX_ASPECT_RATIO} (16:9)."
+                )
+            return self.slide_width, self.slide_height
+        except ValueError as e:
+            raise ValueError(f"Invalid aspect ratio format: {self.aspect_ratio}. {e}")
 
     def __post_init__(self):
         self._validate_aspect_ratio()
@@ -98,6 +101,7 @@ class Page:
     h1: Optional[str] = None
     h2: Optional[str] = None
     h3: Optional[str] = None
+    page_id: Optional[int] = None
 
     def __post_init__(self):
         self._preprocess()
@@ -286,6 +290,7 @@ def composite(document: str) -> List[Page]:
     current_escaped = False  # Track whether in code area
     current_h1 = current_h2 = current_h3 = None
     prev_header_level = 0
+    page_id_counter = 0
 
     document = rm_comments(document)
     document, options = parse_frontmatter(document)
@@ -293,7 +298,7 @@ def composite(document: str) -> List[Page]:
     lines = document.split("\n")
 
     def create_page():
-        nonlocal current_page_lines, current_h1, current_h2, current_h3, options
+        nonlocal current_page_lines, current_h1, current_h2, current_h3, options, page_id_counter
         # Only make a new page if there are non-empty lines
         if all(l.strip() == "" for l in current_page_lines):
             return
@@ -312,7 +317,9 @@ def composite(document: str) -> List[Page]:
             h1=current_h1,
             h2=current_h2,
             h3=current_h3,
+            page_id=page_id_counter
         )
+        page_id_counter += 1
 
         pages.append(page)
         current_page_lines = []
