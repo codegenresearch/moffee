@@ -1,12 +1,12 @@
 from typing import List
 import os
 from jinja2 import Environment, FileSystemLoader
-from moffee.compositor import Page, PageOption, composite, parse_frontmatter
+from moffee.compositor import Page, composite, parse_frontmatter
 from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
 
-def read_options(document_path) -> PageOption:
+def read_options(document_path) -> dict:
     """Read frontmatter options from the document path"""
     with open(document_path, "r") as f:
         document = f.read()
@@ -54,16 +54,20 @@ def retrieve_structure(pages: List[Page]) -> dict:
 
 def render_jinja2(document: str, template_dir) -> str:
     """Run jinja2 templating to create html"""
-    # Parse frontmatter and retrieve options
-    _, options = parse_frontmatter(document)
     # Setup Jinja 2
     env = Environment(loader=FileSystemLoader(template_dir))
     env.filters["markdown"] = md
+
+    # Parse frontmatter and retrieve options
+    _, options = parse_frontmatter(document)
 
     # Retrieve slide structure
     pages = composite(document)
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
+
+    # Unpack slide dimensions
+    width, height = options.computed_slide_size
 
     # Prepare data for template rendering
     data = {
@@ -80,8 +84,8 @@ def render_jinja2(document: str, template_dir) -> str:
             }
             for page in pages
         ],
-        "slide_width": options.computed_slide_size[0],
-        "slide_height": options.computed_slide_size[1],
+        "slide_width": width,
+        "slide_height": height,
     }
 
     # Retrieve and render the template
