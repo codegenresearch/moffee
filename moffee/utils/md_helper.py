@@ -40,11 +40,12 @@ def is_empty(line: str) -> bool:
     return is_comment(line) or line.strip() == ""
 
 
-def is_divider(line: str, type=None) -> bool:
+def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     Determines if a given line is a Markdown divider (horizontal rule).
     Markdown dividers are three or more '<->' for horizontal or '===' for vertical,
-    without any other characters except spaces.
+    without any other characters except spaces. If no type is specified, it matches
+    any valid Markdown divider format.
 
     :param line: The line to check
     :param type: Which type to match, str. e.g. "<->" to match "<->" only or "===" for vertical. Defaults to None, match any of "<->" and "===".
@@ -52,10 +53,22 @@ def is_divider(line: str, type=None) -> bool:
     """
     stripped_line = line.strip()
     if type is None:
-        return stripped_line == "<->" or stripped_line == "==="
-
-    assert type in ["<->", "==="], "type must be either '<->' or '==='"
-    return stripped_line == type
+        return bool(re.match(r"^(?:<->|===|---|\*{3,}|-{3,}|_{3,})$", stripped_line))
+    
+    if type == "<->":
+        return stripped_line == "<->"
+    elif type == "===":
+        return stripped_line == "==="
+    elif type == "---":
+        return stripped_line == "---"
+    elif type == "*":
+        return bool(re.match(r"^\*{3,}$", stripped_line))
+    elif type == "-":
+        return bool(re.match(r"^-{3,}$", stripped_line))
+    elif type == "_":
+        return bool(re.match(r"^_{3,}$", stripped_line))
+    else:
+        return False
 
 
 def contains_image(line: str) -> bool:
@@ -97,9 +110,12 @@ def extract_title(document: str) -> Optional[str]:
         return None
 
 
-def rm_comments(document):
+def rm_comments(document: str) -> str:
     """
-    Remove comments from markdown. Supports html and "%%"
+    Remove comments from markdown. Supports HTML comments and "%%" comments.
+
+    :param document: The document in markdown
+    :return: The document with comments removed
     """
     document = re.sub(r"<!--[\s\S]*?-->", "", document)
     document = re.sub(r"^\s*%%.*$", "", document, flags=re.MULTILINE)
