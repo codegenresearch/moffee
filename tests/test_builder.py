@@ -67,7 +67,7 @@ def test_rendering(setup_test_env):
         doc = f.read()
     html = render_jinja2(doc, template_dir())
     assert appeared(html, r'chunk-paragraph') == 5
-    assert appeared(html, r'"chunk"') == 7
+    assert appeared(html, r'chunk') == 7
     assert appeared(html, r'chunk-horizontal') == 1
     assert appeared(html, r'chunk-vertical') == 1
 
