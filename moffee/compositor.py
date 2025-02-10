@@ -12,9 +12,9 @@ from moffee.utils.md_helper import (
 )
 
 
-DEFAULT_WIDTH = 1024
-DEFAULT_HEIGHT = 768
-ASPECT_RATIO = DEFAULT_WIDTH / DEFAULT_HEIGHT
+DEFAULT_WIDTH = 1920
+DEFAULT_HEIGHT = 1080
+DEFAULT_ASPECT_RATIO = "16:9"
 
 
 @dataclass
@@ -28,17 +28,25 @@ class PageOption:
     styles: dict = field(default_factory=dict)
     width: int = DEFAULT_WIDTH
     height: int = DEFAULT_HEIGHT
-    aspect_ratio: float = field(init=False)
+    aspect_ratio: str = DEFAULT_ASPECT_RATIO
 
     def __post_init__(self):
-        self.aspect_ratio = self.width / self.height
         self.validate_aspect_ratio()
 
     def validate_aspect_ratio(self):
-        if self.aspect_ratio < 0.5 or self.aspect_ratio > 2:
-            raise ValueError("Aspect ratio error: dimensions are too skewed.")
+        try:
+            ratio_parts = self.aspect_ratio.split(":")
+            if len(ratio_parts) != 2 or not all(part.isdigit() for part in ratio_parts):
+                raise ValueError
+            width_ratio, height_ratio = map(int, ratio_parts)
+            if width_ratio <= 0 or height_ratio <= 0:
+                raise ValueError
+        except ValueError:
+            raise ValueError("Aspect ratio error: must be in the format 'width:height' with positive integers.")
 
-    def compute_slide_size(self) -> Tuple[int, int]:
+    @property
+    def computed_slide_size(self) -> Tuple[int, int]:
+        width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
         return self.width, self.height
 
 
@@ -80,7 +88,7 @@ class Page:
 
     def __post_init__(self):
         self._preprocess()
-        self.width, self.height = self.option.compute_slide_size()
+        self.width, self.height = self.option.computed_slide_size
 
     @property
     def title(self) -> Optional[str]:
@@ -139,8 +147,23 @@ class Page:
         - Removes headings 1-3
         - Strips
         """
-
         lines = self.raw_md.splitlines()
+        headers = []
+        for line in lines:
+            header_level = get_header_level(line)
+            if 1 <= header_level <= 3:
+                headers.append((header_level, line.lstrip("#").strip()))
+            else:
+                break
+
+        for header_level, header_text in headers:
+            if header_level == 1:
+                self.h1 = header_text
+            elif header_level == 2:
+                self.h2 = header_text
+            elif header_level == 3:
+                self.h3 = header_text
+
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
         self.raw_md = "\n".join(lines).strip()
 
@@ -175,7 +198,7 @@ def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
         name = field.name
         if name in yaml_data:
             setattr(option, name, yaml_data.pop(name))
-    option.styles = yaml_data
+    option.styles.update(yaml_data)
 
     return content, option
 
