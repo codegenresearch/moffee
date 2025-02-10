@@ -12,8 +12,8 @@ from moffee.utils.md_helper import (
 )
 
 
-DEFAULT_WIDTH = 1920
-DEFAULT_HEIGHT = 1080
+DEFAULT_SLIDE_WIDTH = 1920
+DEFAULT_SLIDE_HEIGHT = 1080
 DEFAULT_ASPECT_RATIO = "16:9"
 
 
@@ -26,8 +26,8 @@ class PageOption:
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
-    width: int = DEFAULT_WIDTH
-    height: int = DEFAULT_HEIGHT
+    width: int = DEFAULT_SLIDE_WIDTH
+    height: int = DEFAULT_SLIDE_HEIGHT
     aspect_ratio: str = DEFAULT_ASPECT_RATIO
 
     def __post_init__(self):
@@ -35,19 +35,19 @@ class PageOption:
 
     def validate_aspect_ratio(self):
         try:
-            ratio_parts = self.aspect_ratio.split(":")
-            if len(ratio_parts) != 2 or not all(part.isdigit() for part in ratio_parts):
-                raise ValueError
-            width_ratio, height_ratio = map(int, ratio_parts)
+            width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
             if width_ratio <= 0 or height_ratio <= 0:
-                raise ValueError
+                raise ValueError("Aspect ratio dimensions must be positive integers.")
         except ValueError:
             raise ValueError("Aspect ratio error: must be in the format 'width:height' with positive integers.")
 
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
         width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
-        return self.width, self.height
+        total_ratio = width_ratio + height_ratio
+        width = (self.width * width_ratio) // total_ratio
+        height = (self.height * height_ratio) // total_ratio
+        return width, height
 
 
 class Direction:
