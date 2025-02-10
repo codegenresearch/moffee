@@ -23,10 +23,7 @@ def get_header_level(line: str) -> int:
     :return: The header level (1-6) if it's a header, 0 otherwise
     """
     match = re.match(r"^(#{1,6})\s", line)
-    if match:
-        return len(match.group(1))
-    else:
-        return 0
+    return len(match.group(1)) if match else 0
 
 
 def is_empty(line: str) -> bool:
@@ -37,33 +34,29 @@ def is_empty(line: str) -> bool:
     :param line: The line to check
     :return: True if the line is empty, False otherwise
     """
-    return is_comment(line) or line.strip() == ""
+    return is_comment(line) or not line.strip()
 
 
 def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
-    Determines if a given line is a Markdown divider (horizontal rule, vertical divider, or horizontal divider).
+    Determines if a given line is a Markdown divider (horizontal rule).
+    Markdown dividers are three or more hyphens, asterisks, or underscores,
+    without any other characters except spaces.
 
     :param line: The line to check
-    :param type: Which type to match, str. e.g. "*" to match "***" only, "<" to match "<->", "=" to match "===".
-                 Defaults to None, match any of "*", "-", "_", "<" or "=".
+    :param type: Which type to match, str. e.g. "*" to match "***" only. Defaults to None, match any of "*", "-" and "_".
     :return: True if the line is a divider, False otherwise
     """
     stripped_line = line.strip()
-    if type is None:
-        return bool(re.match(r"^\s*([\*\-\_]{3,}|<->|={3,})\s*$", stripped_line))
-    elif type == "*":
-        return bool(re.match(r"^\s*\*{3,}\s*$", stripped_line))
-    elif type == "-":
-        return bool(re.match(r"^\s*\-{3,}\s*$", stripped_line))
-    elif type == "_":
-        return bool(re.match(r"^\s*_{3,}\s*$", stripped_line))
-    elif type == "<":
-        return bool(re.match(r"^\s*<->\s*$", stripped_line))
-    elif type == "=":
-        return bool(re.match(r"^\s*={3,}\s*$", stripped_line))
-    else:
+    if len(stripped_line) < 3:
         return False
+    if type is None:
+        type = "-*_"
+
+    valid_chars = set(type)
+    return all(char in valid_chars for char in stripped_line) and any(
+        char * 3 in stripped_line for char in valid_chars
+    )
 
 
 def contains_image(line: str) -> bool:
@@ -90,26 +83,23 @@ def contains_deco(line: str) -> bool:
 
 def extract_title(document: str) -> Optional[str]:
     """
-    Extracts proper title from document.
-    The title should be the first-occurred level 1 or 2 heading.
+    Extracts the first level 1 or 2 heading from the document as the title.
 
     :param document: The document in markdown
-    :return: title if there is one, otherwise None
+    :return: The title if there is one, otherwise None
     """
     heading_pattern = r"^(#|##)\s+(.*?)(?:\n|$)"
     match = re.search(heading_pattern, document, re.MULTILINE)
-
-    if match:
-        return match.group(2).strip()
-    else:
-        return None
+    return match.group(2).strip() if match else None
 
 
-def rm_comments(document):
+def rm_comments(document: str) -> str:
     """
-    Remove comments from markdown. Supports html and "%%"
+    Remove HTML and single-line comments from the markdown document.
+
+    :param document: The markdown document
+    :return: The document with comments removed
     """
     document = re.sub(r"<!--[\s\S]*?-->", "", document)
     document = re.sub(r"^\s*%%.*$", "", document, flags=re.MULTILINE)
-
     return document.strip()
