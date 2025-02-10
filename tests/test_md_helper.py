@@ -46,6 +46,8 @@ def test_is_divider():
     assert is_divider("<->", type="<") is True
     assert is_divider("<- >", type="<") is True
     assert is_divider("<->", type="=") is False
+    assert is_divider("   <->   ", type="<") is True
+    assert is_divider("   <- >   ", type="<") is True
 
 
 def test_contains_image():
