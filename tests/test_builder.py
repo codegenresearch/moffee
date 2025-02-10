@@ -24,11 +24,11 @@ Other Pages
 ![Image-1](image.png)
 ---
 Paragraph 1
-===
+<!-- Divider -->
 Paragraph 2
-<->
+<!-- Divider -->
 Paragraph 3
-<->
+<!-- Divider -->
 ![Image-2](image2.png)
     """
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -68,8 +68,6 @@ def test_rendering(setup_test_env):
 
 def test_read_options(setup_test_env):
     _, doc_path, _, _ = setup_test_env
-    # import ipdb; ipdb.set_trace(context=15)
-
     options = read_options(doc_path)
     assert options.default_h1 is True
     assert options.theme == "beam"
@@ -134,6 +132,41 @@ p4
         {"h1": "Title", "h2": "Heading2", "h3": "Subheading1"},
         {"h1": "Title2", "h2": None, "h3": None},
     ]
+
+
+def test_custom_decorators():
+    doc = """
+---
+default_h1: true
+---
+# Title1
+@(background=blue)
+## Title2
+# Title
+@(default_h1=false)
+Hello
+"""
+    pages = composite(doc)
+    assert len(pages) == 2
+    assert pages[0].raw_md == ""
+    assert pages[0].title == "Title1"
+    assert pages[0].subtitle == "Title2"
+    assert pages[0].option.styles == {"background": "blue"}
+    assert pages[0].option.default_h1 is True
+    assert pages[1].option.default_h1 is False
+
+
+def test_comment_removal():
+    doc = """
+# Title
+<!-- This is a comment -->
+Content
+<!-- Another comment -->
+"""
+    pages = composite(doc)
+    assert pages[0].raw_md == "Content"
+    assert pages[0].title == "Title"
+    assert pages[0].subtitle is None
 
 
 if __name__ == "__main__":
