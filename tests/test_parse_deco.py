@@ -18,7 +18,7 @@ def test_empty_deco():
 
 def test_invalid_deco():
     line = "This is not a deco"
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid deco format"):
         _ = parse_deco(line)
 
 
@@ -97,6 +97,22 @@ def test_computed_slide_size_default_aspect_ratio():
     assert option.width == 800
     assert option.height == 600
     assert option.aspect_ratio == 1.33
+
+
+def test_computed_slide_size_with_aspect_ratio_override():
+    line = "@( width=800, height=600, aspect_ratio=1.5 )"
+    option = parse_deco(line)
+    assert option.width == 800
+    assert option.height == 600
+    assert option.aspect_ratio == 1.5
+
+
+def test_computed_slide_size_with_only_aspect_ratio():
+    line = "@( aspect_ratio=1.78 )"
+    option = parse_deco(line)
+    assert option.width is None
+    assert option.height is None
+    assert option.aspect_ratio == 1.78
 
 
 if __name__ == "__main__":
