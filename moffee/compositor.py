@@ -12,6 +12,11 @@ from moffee.utils.md_helper import (
 )
 
 
+DEFAULT_WIDTH = 1024
+DEFAULT_HEIGHT = 768
+ASPECT_RATIO = DEFAULT_WIDTH / DEFAULT_HEIGHT
+
+
 @dataclass
 class PageOption:
     default_h1: bool = False
@@ -21,8 +26,20 @@ class PageOption:
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
-    width: Optional[int] = None
-    height: Optional[int] = None
+    width: int = DEFAULT_WIDTH
+    height: int = DEFAULT_HEIGHT
+    aspect_ratio: float = field(init=False)
+
+    def __post_init__(self):
+        self.aspect_ratio = self.width / self.height
+        self.validate_aspect_ratio()
+
+    def validate_aspect_ratio(self):
+        if self.aspect_ratio < 0.5 or self.aspect_ratio > 2:
+            raise ValueError("Aspect ratio error: dimensions are too skewed.")
+
+    def compute_slide_size(self) -> Tuple[int, int]:
+        return self.width, self.height
 
 
 class Direction:
@@ -63,7 +80,7 @@ class Page:
 
     def __post_init__(self):
         self._preprocess()
-        self._calculate_dimensions()
+        self.width, self.height = self.option.compute_slide_size()
 
     @property
     def title(self) -> Optional[str]:
@@ -99,7 +116,7 @@ class Page:
                     strs.append("\n")
                 else:
                     strs[-1] += line + "\n"
-            return [Chunk(paragraph=s) for s in strs]
+            return [Chunk(paragraph=s.strip()) for s in strs if s.strip()]
 
         # collect "___"
         vchunks = split_by_div(self.raw_md, "_")
@@ -120,28 +137,12 @@ class Page:
         Modifies raw_md in place.
 
         - Removes headings 1-3
-        - Stripes
+        - Strips
         """
 
         lines = self.raw_md.splitlines()
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
         self.raw_md = "\n".join(lines).strip()
-
-    def _calculate_dimensions(self):
-        """
-        Calculate the dimensions of the slide based on content.
-        Handle aspect ratio errors gracefully.
-        """
-        try:
-            # Placeholder for actual dimension calculation logic
-            self.width = 1024  # Example width
-            self.height = 768  # Example height
-            if self.width / self.height < 0.5 or self.width / self.height > 2:
-                raise ValueError("Aspect ratio error: dimensions are too skewed.")
-        except ValueError as e:
-            print(f"Error calculating dimensions: {e}")
-            self.width = 1024  # Default width
-            self.height = 768  # Default height
 
 
 def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
