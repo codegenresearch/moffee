@@ -26,9 +26,9 @@ class PageOption:
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
+    aspect_ratio: str = DEFAULT_ASPECT_RATIO
     slide_width: int = DEFAULT_SLIDE_WIDTH
     slide_height: int = DEFAULT_SLIDE_HEIGHT
-    aspect_ratio: str = DEFAULT_ASPECT_RATIO
 
     def __post_init__(self):
         self.validate_aspect_ratio()
@@ -68,7 +68,7 @@ class Alignment:
 
 @dataclass
 class Chunk:
-    paragraph: str = ""
+    paragraph: Optional[str] = None
     children: Optional[List["Chunk"]] = field(default_factory=list)  # List of chunks
     direction: Direction = Direction.HORIZONTAL
     type: Type = Type.PARAGRAPH
@@ -263,7 +263,6 @@ def composite(document: str) -> List[Page]:
     - "---" Divider (___, ***, +++ not count)
 
     :param document: Input markdown document as a string.
-    :param document_path: Optional string, will be used to redirect url in documents if given.
     :return: List of Page objects representing paginated slides
     """
     pages: List[Page] = []
