@@ -122,10 +122,8 @@ Content 3
 def test_escaped_area_paging():
     doc = """
 Content 1
-
 ---
 Content 2
-
 ---
 Content 3
     """
@@ -138,10 +136,8 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-
 ---
 Content 3
-
     """
     pages = composite(doc)
     assert len(pages) == 2
