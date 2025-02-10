@@ -32,7 +32,7 @@ def get_header_level(line: str) -> int:
 def is_empty(line: str) -> bool:
     """
     Determines if a given line is an empty line in markdown.
-    A line is empty if it is blank or comment only
+    A line is empty if it is blank or comment only.
 
     :param line: The line to check
     :return: True if the line is empty, False otherwise
@@ -100,7 +100,9 @@ def extract_title(document: str) -> Optional[str]:
     """
     heading_pattern = r"^(#|##)\s+(.*?)(?:\n|$)"
     match = re.search(heading_pattern, document, re.MULTILINE)
-    return match.group(2).strip() if match else None
+    if match:
+        return match.group(2).strip()
+    return None
 
 
 def rm_comments(document: str) -> str:
