@@ -17,7 +17,7 @@ def test_empty_deco():
 
 def test_invalid_deco():
     line = "This is not a deco"
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid deco format"):
         _ = parse_deco(line)
 
 
@@ -133,6 +133,15 @@ def test_aspect_ratio_from_width_height():
     line = "@(width=1280, height=720)"
     page_option = parse_deco(line)
     assert page_option.aspect_ratio == 1280 / 720
+
+
+def test_default_values():
+    # Test default values
+    line = "@()"
+    page_option = parse_deco(line)
+    assert page_option.width is None
+    assert page_option.height is None
+    assert page_option.aspect_ratio is None
 
 
 if __name__ == "__main__":
