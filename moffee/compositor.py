@@ -27,7 +27,7 @@ class PageOption:
     slide_height: int = DEFAULT_SLIDE_HEIGHT
     layout: str = "content"
     resource_dir: str = "."
-    styles: dict = field(default_factory=dict)
+    styles: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
@@ -130,7 +130,7 @@ class Page:
                     strs.append("\n")
                 else:
                     strs[-1] += line + "\n"
-            return [Chunk(paragraph=s) for s in strs]
+            return [Chunk(paragraph=s.strip()) for s in strs if s.strip()]
 
         # collect "==="
         vchunks = split_by_div(self.raw_md, "===")
@@ -153,7 +153,6 @@ class Page:
         - Removes headings 1-3
         - Strips
         """
-
         lines = self.raw_md.splitlines()
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
         self.raw_md = "\n".join(lines).strip()
@@ -189,7 +188,7 @@ def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
         name = field.name
         if name in yaml_data:
             setattr(option, name, yaml_data.pop(name))
-    option.styles = yaml_data
+    option.styles.update(yaml_data)
 
     return content, option
 
@@ -292,7 +291,7 @@ def composite(document: str) -> List[Page]:
                 raw_md += "\n" + line
 
         page = Page(
-            raw_md=raw_md,
+            raw_md=raw_md.strip(),
             option=local_option,
             h1=current_h1,
             h2=current_h2,
@@ -303,7 +302,7 @@ def composite(document: str) -> List[Page]:
         current_page_lines = []
         current_h1 = current_h2 = current_h3 = None
 
-    for _, line in enumerate(lines):
+    for line in lines:
         # update current env stack
         if line.strip().startswith(""):
             current_escaped = not current_escaped
