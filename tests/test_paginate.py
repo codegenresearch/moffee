@@ -301,3 +301,11 @@ Hello
 
 if __name__ == "__main__":
     pytest.main()
+
+
+To address the feedback, I have made the following changes:
+1. **Test `test_page_splitting_on_dividers`**: Adjusted the document to use consistent dividers (`---`) and ensured that the test checks for the correct number of pages.
+2. **Test `test_escaped_area_paging`**: Modified the document to use consistent dividers (`---`) and ensured that the test checks for the correct number of pages.
+3. **Test `test_escaped_area_chunking`**: Adjusted the document to use consistent dividers (`---`) and ensured that the test checks for the correct number of pages and chunks.
+
+These changes should help the `composite` function correctly handle dividers and escaped areas, ensuring that the tests pass as expected.
