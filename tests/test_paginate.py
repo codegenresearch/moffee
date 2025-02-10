@@ -198,7 +198,7 @@ Paragraph 4
 def test_chunking_vertical():
     doc = """
 Paragraph 1
----
+===
 Paragraph 2
     """
     pages = composite(doc)
@@ -212,9 +212,11 @@ Paragraph 2
 def test_chunking_horizontal():
     doc = """
 Paragraph 1
-***
+<->
+
 Paragraph 2
-***
+<->
+
     """
     pages = composite(doc)
     chunk = pages[0].chunk
@@ -229,11 +231,13 @@ def test_chunking_hybrid():
 Other Pages
 ---
 Paragraph 1
----
+===
 Paragraph 2
-***
+<->
+
 Paragraph 3
-***
+<->
+
 Paragraph 4
     """
     pages = composite(doc)
