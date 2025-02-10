@@ -13,9 +13,9 @@ from moffee.utils.md_helper import (
 
 
 # Constants for default values
+DEFAULT_ASPECT_RATIO = "16:9"
 DEFAULT_SLIDE_WIDTH = 720
 DEFAULT_SLIDE_HEIGHT = 405
-DEFAULT_ASPECT_RATIO = "16:9"
 MIN_ASPECT_RATIO = 1.33
 MAX_ASPECT_RATIO = 1.78
 
@@ -36,7 +36,17 @@ class PageOption:
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
         """Returns the computed slide size as a tuple (width, height)."""
+        width_ratio, height_ratio = map(int, self.aspect_ratio.split(":"))
+        calculated_aspect_ratio = width_ratio / height_ratio
+        if calculated_aspect_ratio < MIN_ASPECT_RATIO or calculated_aspect_ratio > MAX_ASPECT_RATIO:
+            raise ValueError(
+                f"Unsupported aspect ratio: {calculated_aspect_ratio}. "
+                f"Please use an aspect ratio between {MIN_ASPECT_RATIO} (4:3) and {MAX_ASPECT_RATIO} (16:9)."
+            )
         return self.slide_width, self.slide_height
+
+    def __post_init__(self):
+        self._validate_aspect_ratio()
 
     def _validate_aspect_ratio(self):
         """Validates the aspect ratio of the slide dimensions."""
@@ -49,13 +59,10 @@ class PageOption:
             if calculated_aspect_ratio < MIN_ASPECT_RATIO or calculated_aspect_ratio > MAX_ASPECT_RATIO:
                 raise ValueError(
                     f"Unsupported aspect ratio: {calculated_aspect_ratio}. "
-                    f"Please use an aspect ratio between {MAX_ASPECT_RATIO} (16:9) and {MIN_ASPECT_RATIO} (4:3)."
+                    f"Please use an aspect ratio between {MIN_ASPECT_RATIO} (4:3) and {MAX_ASPECT_RATIO} (16:9)."
                 )
         except ValueError as e:
             raise ValueError(f"Invalid aspect ratio format: {self.aspect_ratio}. {e}")
-
-    def __post_init__(self):
-        self._validate_aspect_ratio()
 
 
 class Direction:
@@ -205,7 +212,7 @@ def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
         name = field.name
         if name in yaml_data:
             setattr(option, name, yaml_data.pop(name))
-    option.styles = yaml_data
+    option.styles.update(yaml_data)
 
     return content, option
 
