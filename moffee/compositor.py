@@ -12,6 +12,13 @@ from moffee.utils.md_helper import (
 )
 
 
+# Constants for default values
+DEFAULT_SLIDE_WIDTH = 1024
+DEFAULT_SLIDE_HEIGHT = 768
+MIN_ASPECT_RATIO = 1.33
+MAX_ASPECT_RATIO = 1.78
+
+
 @dataclass
 class PageOption:
     default_h1: bool = False
@@ -21,8 +28,30 @@ class PageOption:
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
-    slide_width: int = 1024  # Default slide width
-    slide_height: int = 768  # Default slide height
+    slide_width: int = DEFAULT_SLIDE_WIDTH
+    slide_height: int = DEFAULT_SLIDE_HEIGHT
+
+    @property
+    def computed_slide_size(self) -> Tuple[int, int]:
+        """Returns the computed slide size as a tuple (width, height)."""
+        return self.slide_width, self.slide_height
+
+    @property
+    def aspect_ratio(self) -> float:
+        """Calculates and returns the aspect ratio of the slide."""
+        return self.slide_width / self.slide_height
+
+    def _validate_aspect_ratio(self):
+        """Validates the aspect ratio of the slide dimensions."""
+        aspect_ratio = self.aspect_ratio
+        if aspect_ratio < MIN_ASPECT_RATIO or aspect_ratio > MAX_ASPECT_RATIO:
+            raise ValueError(
+                f"Unsupported aspect ratio: {aspect_ratio}. "
+                f"Please use an aspect ratio between {MAX_ASPECT_RATIO} (16:9) and {MIN_ASPECT_RATIO} (4:3)."
+            )
+
+    def __post_init__(self):
+        self._validate_aspect_ratio()
 
 
 class Direction:
@@ -61,14 +90,15 @@ class Page:
 
     def __post_init__(self):
         self._preprocess()
-        self._validate_aspect_ratio()
 
     @property
     def title(self) -> Optional[str]:
+        """Returns the title of the page, which is the first non-None header."""
         return self.h1 or self.h2 or self.h3
 
     @property
     def subtitle(self) -> Optional[str]:
+        """Returns the subtitle of the page, which is the second non-None header."""
         if self.h1:
             return self.h2 or self.h3
         elif self.h2:
@@ -78,13 +108,13 @@ class Page:
     @property
     def chunk(self) -> Chunk:
         """
-        Split raw_md into chunk tree
-        Chunk tree branches when in-page divider is met.
-        - adjacent "***"s create chunk with horizontal direction
-        - adjacent "___" create chunk with vertical direction
-        "___" possesses higher priority than "***"
+        Splits raw_md into a chunk tree.
+        Chunk tree branches when an in-page divider is met.
+        - Adjacent "***"s create a chunk with horizontal direction.
+        - Adjacent "___"s create a chunk with vertical direction.
+        "___" has higher priority than "***".
 
-        :return: Root of the chunk tree
+        :return: Root of the chunk tree.
         """
 
         def split_by_div(text, type) -> List[Chunk]:
@@ -97,14 +127,14 @@ class Page:
                     strs.append("\n")
                 else:
                     strs[-1] += line + "\n"
-            return [Chunk(paragraph=s) for s in strs]
+            return [Chunk(paragraph=s.strip()) for s in strs if s.strip()]
 
-        # collect "___"
+        # Collect "___"
         vchunks = split_by_div(self.raw_md, "_")
-        # split by "***" if possible
+        # Split by "***" if possible
         for i in range(len(vchunks)):
             hchunks = split_by_div(vchunks[i].paragraph, "*")
-            if len(hchunks) > 1:  # found ***
+            if len(hchunks) > 1:  # Found ***
                 vchunks[i] = Chunk(children=hchunks, type=Type.NODE)
 
         if len(vchunks) == 1:
@@ -120,28 +150,14 @@ class Page:
         - Removes headings 1-3
         - Strips
         """
-
         lines = self.raw_md.splitlines()
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
         self.raw_md = "\n".join(lines).strip()
 
-    def _validate_aspect_ratio(self):
-        """
-        Validates the aspect ratio of the slide dimensions.
-        Raises a ValueError if the aspect ratio is not supported.
-        """
-        width = self.option.slide_width
-        height = self.option.slide_height
-        aspect_ratio = width / height
-
-        if aspect_ratio < 1.33 or aspect_ratio > 1.78:
-            raise ValueError(f"Unsupported aspect ratio: {aspect_ratio}. "
-                             f"Please use an aspect ratio between 16:9 (1.78) and 4:3 (1.33).")
-
 
 def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
     """
-    Parse the YAML front matter in a given markdown document.
+    Parses the YAML front matter in a given markdown document.
 
     :param document: Input markdown document as a string.
     :return: A tuple containing the document with front matter removed and the PageOption.
@@ -176,12 +192,13 @@ def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
 
 def parse_deco(line: str, base_option: Optional[PageOption] = None) -> PageOption:
     """
-    Parses a deco (custom decorator) line and returns a dictionary of key-value pairs.
-    If base_option is provided, it updates the option with matching keys from the deco. Otherwise initialize an option.
+    Parses a deco (custom decorator) line and returns an updated PageOption.
+    If base_option is provided, it updates the option with matching keys from the deco.
+    Otherwise, it initializes a new PageOption.
 
-    :param line: The line containing the deco
-    :param base_option: Optional PageOption to update with deco values
-    :return: An updated PageOption
+    :param line: The line containing the deco.
+    :param base_option: Optional PageOption to update with deco values.
+    :return: An updated PageOption.
     """
 
     def rm_quotes(s):
@@ -214,7 +231,7 @@ def parse_deco(line: str, base_option: Optional[PageOption] = None) -> PageOptio
 
 
 def parse_value(value: str):
-    """Helper function to parse string values into appropriate types"""
+    """Helper function to parse string values into appropriate types."""
     if value.lower() == "true":
         return True
     elif value.lower() == "false":
@@ -228,18 +245,18 @@ def parse_value(value: str):
 
 def composite(document: str) -> List[Page]:
     """
-    Composite a markdown document into slide pages.
+    Composites a markdown document into slide pages.
 
     Splitting criteria:
     - New h1/h2/h3 header (except when following another header)
-    - "---" Divider (___, ***, +++ not count)
+    - "---" Divider (___, ***, +++ not counted)
 
     :param document: Input markdown document as a string.
-    :return: List of Page objects representing paginated slides
+    :return: List of Page objects representing paginated slides.
     """
     pages: List[Page] = []
     current_page_lines = []
-    current_escaped = False  # track whether in code area
+    current_escaped = False  # Track whether in code area
     current_h1 = current_h2 = current_h3 = None
     prev_header_level = 0
 
@@ -250,8 +267,7 @@ def composite(document: str) -> List[Page]:
 
     def create_page():
         nonlocal current_page_lines, current_h1, current_h2, current_h3, options
-        # Only make new page if has non empty lines
-
+        # Only make a new page if there are non-empty lines
         if all(l.strip() == "" for l in current_page_lines):
             return
 
@@ -264,7 +280,7 @@ def composite(document: str) -> List[Page]:
                 raw_md += "\n" + line
 
         page = Page(
-            raw_md=raw_md,
+            raw_md=raw_md.strip(),
             option=local_option,
             h1=current_h1,
             h2=current_h2,
@@ -275,8 +291,8 @@ def composite(document: str) -> List[Page]:
         current_page_lines = []
         current_h1 = current_h2 = current_h3 = None
 
-    for _, line in enumerate(lines):
-        # update current env stack
+    for line in lines:
+        # Update current environment stack
         if line.strip().startswith(""):
             current_escaped = not current_escaped
 
@@ -304,8 +320,6 @@ def composite(document: str) -> List[Page]:
             current_h2 = line.lstrip("#").strip()
         elif header_level == 3:
             current_h3 = line.lstrip("#").strip()
-        else:
-            pass  # Handle other cases or do nothing
 
         if header_level > 0:
             prev_header_level = header_level
