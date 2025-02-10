@@ -204,9 +204,9 @@ Paragraph 4
     """
     pages = composite(doc)
     chunk = pages[0].chunk
-    assert chunk.type == Type.PARAGRAPH
-    assert len(chunk.children) == 0
-    assert chunk.paragraph.strip() == doc.strip()
+    assert chunk.type == Type.NODE
+    assert len(chunk.children) == 4
+    assert chunk.children[0].type == Type.PARAGRAPH
 
 
 def test_chunking_vertical():
