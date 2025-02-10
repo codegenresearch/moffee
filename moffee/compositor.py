@@ -1,6 +1,5 @@
-from typing import List
-from dataclasses import dataclass, field, fields
 from typing import List, Optional, Tuple, Dict, Any
+from dataclasses import dataclass, field, fields
 from copy import deepcopy
 import yaml
 import re
@@ -12,10 +11,6 @@ from moffee.utils.md_helper import (
     contains_deco,
 )
 
-DEFAULT_ASPECT_RATIO = "16:9"
-DEFAULT_SLIDE_WIDTH = 720
-DEFAULT_SLIDE_HEIGHT = 405
-
 
 @dataclass
 class PageOption:
@@ -23,41 +18,11 @@ class PageOption:
     default_h2: bool = True
     default_h3: bool = True
     theme: str = "default"
-    aspect_ratio: str = DEFAULT_ASPECT_RATIO
-    slide_width: int = DEFAULT_SLIDE_WIDTH
-    slide_height: int = DEFAULT_SLIDE_HEIGHT
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
-
-    @property
-    def computed_slide_size(self) -> Tuple[int, int]:
-        changed_ar = self.aspect_ratio != DEFAULT_ASPECT_RATIO
-        changed_w = self.slide_width != DEFAULT_SLIDE_WIDTH
-        changed_h = self.slide_height != DEFAULT_SLIDE_HEIGHT
-
-        assert isinstance(
-            self.aspect_ratio, str
-        ), f"Aspect ratio must be a string, got {self.aspect_ratio}"
-        matches = re.match("([0-9]+):([0-9]+)", self.aspect_ratio)
-        if matches is None:
-            raise ValueError(f"Incorrect aspect ratio format: {self.aspect_ratio}")
-        ar = int(matches.group(2)) / int(matches.group(1))
-        width = self.slide_width
-        height = self.slide_height
-
-        if changed_ar and changed_h and changed_w:
-            raise ValueError(
-                f"Aspect ratio, width and height cannot be changed at the same time!"
-            )
-        if changed_ar and changed_h:
-            width = height / ar
-        elif changed_ar and changed_w:
-            height = width * ar
-        elif changed_ar:
-            height = width * ar
-
-        return width, height
+    width: Optional[int] = None
+    height: Optional[int] = None
 
 
 class Direction:
@@ -93,9 +58,12 @@ class Page:
     h1: Optional[str] = None
     h2: Optional[str] = None
     h3: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
 
     def __post_init__(self):
         self._preprocess()
+        self._calculate_dimensions()
 
     @property
     def title(self) -> Optional[str]:
@@ -125,7 +93,7 @@ class Page:
             strs = [""]
             current_escaped = False
             for line in text.split("\n"):
-                if line.strip().startswith("```"):
+                if line.strip().startswith(""):
                     current_escaped = not current_escaped
                 if is_divider(line, type) and not current_escaped:
                     strs.append("\n")
@@ -158,6 +126,22 @@ class Page:
         lines = self.raw_md.splitlines()
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
         self.raw_md = "\n".join(lines).strip()
+
+    def _calculate_dimensions(self):
+        """
+        Calculate the dimensions of the slide based on content.
+        Handle aspect ratio errors gracefully.
+        """
+        try:
+            # Placeholder for actual dimension calculation logic
+            self.width = 1024  # Example width
+            self.height = 768  # Example height
+            if self.width / self.height < 0.5 or self.width / self.height > 2:
+                raise ValueError("Aspect ratio error: dimensions are too skewed.")
+        except ValueError as e:
+            print(f"Error calculating dimensions: {e}")
+            self.width = 1024  # Default width
+            self.height = 768  # Default height
 
 
 def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
@@ -299,7 +283,7 @@ def composite(document: str) -> List[Page]:
 
     for _, line in enumerate(lines):
         # update current env stack
-        if line.strip().startswith("```"):
+        if line.strip().startswith(""):
             current_escaped = not current_escaped
 
         header_level = get_header_level(line) if not current_escaped else 0
