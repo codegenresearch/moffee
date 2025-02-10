@@ -23,7 +23,10 @@ def get_header_level(line: str) -> int:
     :return: The header level (1-6) if it's a header, 0 otherwise
     """
     match = re.match(r"^(#{1,6})\s", line)
-    return len(match.group(1)) if match else 0
+    if match:
+        return len(match.group(1))
+    else:
+        return 0
 
 
 def is_empty(line: str) -> bool:
@@ -34,7 +37,7 @@ def is_empty(line: str) -> bool:
     :param line: The line to check
     :return: True if the line is empty, False otherwise
     """
-    return is_comment(line) or not line.strip()
+    return is_comment(line) or line.strip() == ""
 
 
 def is_divider(line: str, type: Optional[str] = None) -> bool:
@@ -50,13 +53,21 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
     stripped_line = line.strip()
     if len(stripped_line) < 3:
         return False
-    if type is None:
-        type = "-*_"
 
-    valid_chars = set(type)
-    return all(char in valid_chars for char in stripped_line) and any(
-        char * 3 in stripped_line for char in valid_chars
-    )
+    if type is None:
+        return bool(re.match(r"^[-*_]{3,}$", stripped_line))
+    elif type == "-":
+        return bool(re.match(r"^-{3,}$", stripped_line))
+    elif type == "*":
+        return bool(re.match(r"^\*{3,}$", stripped_line))
+    elif type == "_":
+        return bool(re.match(r"^_{3,}$", stripped_line))
+    elif type == "<":
+        return bool(re.match(r"^<->+$", stripped_line))
+    elif type == "=":
+        return bool(re.match(r"^=+$", stripped_line))
+    else:
+        raise ValueError("type must be one of '*', '-', '_', '<', or '='")
 
 
 def contains_image(line: str) -> bool:
@@ -90,7 +101,10 @@ def extract_title(document: str) -> Optional[str]:
     """
     heading_pattern = r"^(#|##)\s+(.*?)(?:\n|$)"
     match = re.search(heading_pattern, document, re.MULTILINE)
-    return match.group(2).strip() if match else None
+    if match:
+        return match.group(2).strip()
+    else:
+        return None
 
 
 def rm_comments(document: str) -> str:
