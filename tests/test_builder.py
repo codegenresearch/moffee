@@ -22,7 +22,9 @@ background-color: 'red'
 # Test page
 Other Pages
 ![Image-1](image.png)
+
 ---
+
 Paragraph 1
 
 ---
