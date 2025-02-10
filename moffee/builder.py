@@ -1,12 +1,12 @@
 from typing import List
 import os
 from jinja2 import Environment, FileSystemLoader
-from moffee.compositor import Page, composite, parse_frontmatter
+from moffee.compositor import Page, PageOption, composite, parse_frontmatter
 from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
 
-def read_options(document_path) -> dict:
+def read_options(document_path) -> PageOption:
     """Read frontmatter options from the document path"""
     with open(document_path, "r") as f:
         document = f.read()
@@ -62,10 +62,10 @@ def render_jinja2(document: str, template_dir) -> str:
     template = env.get_template("index.html")
 
     # Fill template
+    frontmatter, options = parse_frontmatter(document)
     pages = composite(document)
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
-    options = parse_frontmatter(document)[1]
 
     data = {
         "title": title,
@@ -81,8 +81,8 @@ def render_jinja2(document: str, template_dir) -> str:
             }
             for page in pages
         ],
-        "slide_width": options.get('styles', {}).get('width', 1920),
-        "slide_height": options.get('styles', {}).get('height', 1080),
+        "slide_width": options.styles.get('width', 1920),
+        "slide_height": options.styles.get('height', 1080),
     }
 
     return template.render(data)
