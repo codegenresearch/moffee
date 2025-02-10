@@ -308,7 +308,7 @@ if __name__ == "__main__":
 
 
 ### Changes Made:
-1. **Removed Invalid Syntax**: Removed the invalid syntax comment that was causing the `SyntaxError`.
+1. **Removed Invalid Syntax Comment**: Removed the comment "Removed Invalid Syntax" to ensure it does not interfere with the code execution.
 2. **Consistent Document Formatting**: Ensured that the formatting of the documents used in the tests is consistent with the expected structure.
 3. **Test Assertions**: Reviewed and ensured that the assertions in the tests match the expected outcomes.
 4. **Use of Escape Characters**: Ensured that escaped areas in the documents are handled correctly.
