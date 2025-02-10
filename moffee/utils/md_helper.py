@@ -1,3 +1,5 @@
+import os
+from urllib.parse import urljoin, urlparse
 import re
 from typing import Optional
 
@@ -23,7 +25,8 @@ def get_header_level(line: str) -> int:
     match = re.match(r"^(#{1,6})\s", line)
     if match:
         return len(match.group(1))
-    return 0
+    else:
+        return 0
 
 
 def is_empty(line: str) -> bool:
@@ -50,18 +53,12 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     stripped_line = line.strip()
     if type is None:
-        return bool(re.match(r"^(?:<->|===|---|\*{3,}|-{3,}|_{3,})$", stripped_line))
+        return bool(re.match(r"^(?:<->|===)$", stripped_line))
     
     if type == "<":
         return bool(re.match(r"^\s*<->\s*$", stripped_line))
     elif type == "=":
         return bool(re.match(r"^\s*===\s*$", stripped_line))
-    elif type == "-":
-        return bool(re.match(r"^\s*---\s*$", stripped_line))
-    elif type == "*":
-        return bool(re.match(r"^\s*\*{3,}\s*$", stripped_line))
-    elif type == "_":
-        return bool(re.match(r"^\s*_{3,}\s*$", stripped_line))
     return False
 
 
@@ -99,7 +96,8 @@ def extract_title(document: str) -> Optional[str]:
     match = re.search(heading_pattern, document, re.MULTILINE)
     if match:
         return match.group(2).strip()
-    return None
+    else:
+        return None
 
 
 def rm_comments(document: str) -> str:
