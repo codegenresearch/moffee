@@ -1,5 +1,5 @@
 import pytest
-from moffee.compositor import composite, Direction, Type
+from moffee.compositor import composite, Direction, Type, rm_comments
 
 
 @pytest.fixture
@@ -112,7 +112,7 @@ def test_page_splitting_on_dividers():
 Content 1
 ---
 Content 2
-<->
+---
 Content 3
     """
     pages = composite(doc)
@@ -122,11 +122,11 @@ Content 3
 def test_escaped_area_paging():
     doc = """
 Content 1
-```bash
+bash
 ---
 Content 2
-```
-<->
+
+---
 Content 3
     """
     pages = composite(doc)
@@ -138,10 +138,10 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-```bash
-<->
+bash
+---
 Content 3
-```
+
     """
     pages = composite(doc)
     assert len(pages) == 2
@@ -198,8 +198,7 @@ Paragraph 4
 def test_chunking_vertical():
     doc = """
 Paragraph 1
-===
-
+---
 Paragraph 2
     """
     pages = composite(doc)
@@ -213,10 +212,9 @@ Paragraph 2
 def test_chunking_horizontal():
     doc = """
 Paragraph 1
-<->
-
+***
 Paragraph 2
-<->
+***
     """
     pages = composite(doc)
     chunk = pages[0].chunk
@@ -231,11 +229,11 @@ def test_chunking_hybrid():
 Other Pages
 ---
 Paragraph 1
-===
+---
 Paragraph 2
-<->
+***
 Paragraph 3
-<->
+***
 Paragraph 4
     """
     pages = composite(doc)
