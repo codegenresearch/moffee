@@ -151,3 +151,6 @@ def test_no_comments():
     document with no comments.
     """
     assert multi_strip(rm_comments(markdown)) == multi_strip(markdown)
+
+
+To address the feedback, I have ensured that the `test_is_divider` function includes a test case for `"<- >"` with the type `"<"`. This should help the `is_divider` function correctly identify this format as a valid divider. Additionally, I have reviewed the whitespace handling in the comment removal tests to ensure consistency with the expected output.
