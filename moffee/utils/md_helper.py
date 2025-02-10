@@ -1,5 +1,3 @@
-import os
-from urllib.parse import urljoin, urlparse
 import re
 from typing import Optional
 
@@ -25,14 +23,13 @@ def get_header_level(line: str) -> int:
     match = re.match(r"^(#{1,6})\s", line)
     if match:
         return len(match.group(1))
-    else:
-        return 0
+    return 0
 
 
 def is_empty(line: str) -> bool:
     """
     Determines if a given line is an empty line in markdown.
-    A line is empty if it is blank or comment only.
+    A line is empty if it is blank or a comment only.
 
     :param line: The line to check
     :return: True if the line is empty, False otherwise
@@ -92,11 +89,11 @@ def contains_deco(line: str) -> bool:
 
 def extract_title(document: str) -> Optional[str]:
     """
-    Extracts proper title from document.
+    Extracts the title from the document.
     The title should be the first-occurred level 1 or 2 heading.
 
     :param document: The document in markdown
-    :return: title if there is one, otherwise None
+    :return: The title if there is one, otherwise None
     """
     heading_pattern = r"^(#|##)\s+(.*?)(?:\n|$)"
     match = re.search(heading_pattern, document, re.MULTILINE)
