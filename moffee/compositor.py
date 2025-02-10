@@ -388,3 +388,13 @@ def composite(document: str) -> List[Page]:
             page.h3 = env_h3
 
     return pages
+
+
+### Key Changes Made:
+1. **Aspect Ratio Handling**: Simplified and clarified the logic for handling aspect ratios in `PageOption`.
+2. **Chunk Splitting Logic**: Refined the logic for splitting `raw_md` into chunks based on dividers.
+3. **Header Processing**: Streamlined the logic for processing headers in `_preprocess` to ensure all headers are correctly identified and removed.
+4. **Error Handling**: Improved error messages for aspect ratio validation.
+5. **Code Structure and Comments**: Ensured comments are consistent and clear.
+6. **Variable Naming and Initialization**: Ensured variables are named consistently and initialized correctly.
+7. **Functionality Consistency**: Ensured the functionality of methods matches the expected behavior, particularly in `create_page` and header processing.
