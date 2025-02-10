@@ -53,14 +53,14 @@ def test_contains_image():
     assert contains_image("![Alt text](image.jpg)") is True
     assert contains_image("This is an image: ![Alt text](image.jpg)") is True
     assert contains_image("This is not an image") is False
-    assert contains_image("![](image.jpg)") is True
-    assert contains_image("![]()") is True
-    assert contains_image("![]") is False
-    assert contains_image("![]]") is False
-    assert contains_image("![](") is False
-    assert contains_image("![]([])") is False
-    assert contains_image("![]([]]") is False
-    assert contains_image("![]([)]") is False
+    assert contains_image("![](image.jpg)") is True  # Empty alt text
+    assert contains_image("![]()") is False  # Empty URL
+    assert contains_image("![]") is False  # Missing URL
+    assert contains_image("![]]") is False  # Malformed URL
+    assert contains_image("![](") is False  # Malformed URL
+    assert contains_image("![]([])") is False  # Nested brackets in URL
+    assert contains_image("![]([]]") is False  # Nested brackets in URL
+    assert contains_image("![]([)]") is False  # Nested brackets in URL
 
 
 def test_contains_deco():
@@ -68,7 +68,7 @@ def test_contains_deco():
     assert contains_deco("  @(layout=default)  ") is True
     assert contains_deco("This is not a deco") is False
     assert contains_deco("@(key=value) Some text") is False
-    assert contains_deco("@()") is True
+    assert contains_deco("@()") is True  # Empty deco
     assert contains_deco("@(key1=value1, key2=value2)") is True
     assert contains_deco("@(key1=value1, key2=value2, key3=value3)") is True
     assert contains_deco("@(key1=value1, key2=value2, key3=value3, key4=value4)") is True
