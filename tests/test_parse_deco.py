@@ -48,31 +48,55 @@ def test_deco_with_type_conversion():
 
 
 def test_deco_with_spaces():
-    line = "@(layout=split, background=blue)"
+    line = "@( layout=split, background=blue )"
     option = parse_deco(line)
     assert option.layout == "split"
     assert option.styles == {"background": "blue"}
 
 
 def test_deco_with_quotes():
-    line = "@(layout=\"split\", length='34px')"
+    line = "@( layout=\"split\", length='34px' )"
     option = parse_deco(line)
     assert option.layout == "split"
     assert option.styles == {"length": "34px"}
 
 
 def test_deco_with_hyphen():
-    line = "@(background-color='red')"
+    line = "@( background-color='red' )"
     option = parse_deco(line)
     assert option.styles == {"background-color": "red"}
 
 
-def test_computed_slide_sizes():
-    line = "@(width=800, height=600)"
+def test_computed_slide_size():
+    line = "@( width=800, height=600 )"
     option = parse_deco(line)
     assert option.width == 800
     assert option.height == 600
     assert option.aspect_ratio == 800 / 600
+
+
+def test_computed_slide_size_no_height():
+    line = "@( width=800 )"
+    option = parse_deco(line)
+    assert option.width == 800
+    assert option.height is None
+    assert option.aspect_ratio is None
+
+
+def test_computed_slide_size_no_width():
+    line = "@( height=600 )"
+    option = parse_deco(line)
+    assert option.width is None
+    assert option.height == 600
+    assert option.aspect_ratio is None
+
+
+def test_computed_slide_size_default_aspect_ratio():
+    line = "@( width=800, height=600, aspect_ratio=1.33 )"
+    option = parse_deco(line)
+    assert option.width == 800
+    assert option.height == 600
+    assert option.aspect_ratio == 1.33
 
 
 if __name__ == "__main__":
