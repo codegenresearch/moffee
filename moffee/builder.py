@@ -54,19 +54,18 @@ def retrieve_structure(pages: List[Page]) -> dict:
 
 def render_jinja2(document: str, template_dir) -> str:
     """Run jinja2 templating to create html"""
-    # Setup Jinja 2
-    env = Environment(loader=FileSystemLoader(template_dir))
-
-    env.filters["markdown"] = md
-
-    template = env.get_template("index.html")
-
-    # Fill template
-    frontmatter, options = parse_frontmatter(document)
+    # Parse frontmatter and retrieve options
+    _, options = parse_frontmatter(document)
+    # Retrieve slide structure
     pages = composite(document)
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
 
+    # Setup Jinja 2
+    env = Environment(loader=FileSystemLoader(template_dir))
+    env.filters["markdown"] = md
+
+    # Prepare data for template rendering
     data = {
         "title": title,
         "struct": slide_struct,
@@ -81,8 +80,8 @@ def render_jinja2(document: str, template_dir) -> str:
             }
             for page in pages
         ],
-        "slide_width": options.styles.get('width', 1920),
-        "slide_height": options.styles.get('height', 1080),
+        "slide_width": options.computed_slide_size.get('width', 1920),
+        "slide_height": options.computed_slide_size.get('height', 1080),
     }
 
     return template.render(data)
