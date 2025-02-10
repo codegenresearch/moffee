@@ -130,7 +130,7 @@ class Page:
                     strs.append("\n")
                 else:
                     strs[-1] += line + "\n"
-            return [Chunk(paragraph=s) for s in strs]
+            return [Chunk(paragraph=s.strip()) for s in strs if s.strip()]
 
         # collect "___"
         vchunks = split_by_div(self.raw_md, "_")
@@ -138,7 +138,7 @@ class Page:
         for i in range(len(vchunks)):
             hchunks = split_by_div(vchunks[i].paragraph, "*")
             if len(hchunks) > 1:  # found ***
-                vchunks[i] = Chunk(children=hchunks, type=Type.NODE)
+                vchunks[i] = Chunk(children=hchunks, type=Type.NODE, direction=Direction.HORIZONTAL)
 
         if len(vchunks) == 1:
             return vchunks[0]
@@ -151,7 +151,7 @@ class Page:
         Modifies raw_md in place.
 
         - Removes headings 1-3
-        - Stripes
+        - Strips
         """
 
         lines = self.raw_md.splitlines()
