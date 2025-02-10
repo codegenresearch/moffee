@@ -13,8 +13,9 @@ from moffee.utils.md_helper import (
 
 
 # Constants for default values
-DEFAULT_SLIDE_WIDTH = 1024
-DEFAULT_SLIDE_HEIGHT = 768
+DEFAULT_SLIDE_WIDTH = 720
+DEFAULT_SLIDE_HEIGHT = 405
+DEFAULT_ASPECT_RATIO = "16:9"
 MIN_ASPECT_RATIO = 1.33
 MAX_ASPECT_RATIO = 1.78
 
@@ -30,25 +31,28 @@ class PageOption:
     styles: dict = field(default_factory=dict)
     slide_width: int = DEFAULT_SLIDE_WIDTH
     slide_height: int = DEFAULT_SLIDE_HEIGHT
+    aspect_ratio: str = DEFAULT_ASPECT_RATIO
 
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
         """Returns the computed slide size as a tuple (width, height)."""
         return self.slide_width, self.slide_height
 
-    @property
-    def aspect_ratio(self) -> float:
-        """Calculates and returns the aspect ratio of the slide."""
-        return self.slide_width / self.slide_height
-
     def _validate_aspect_ratio(self):
         """Validates the aspect ratio of the slide dimensions."""
-        aspect_ratio = self.aspect_ratio
-        if aspect_ratio < MIN_ASPECT_RATIO or aspect_ratio > MAX_ASPECT_RATIO:
-            raise ValueError(
-                f"Unsupported aspect ratio: {aspect_ratio}. "
-                f"Please use an aspect ratio between {MAX_ASPECT_RATIO} (16:9) and {MIN_ASPECT_RATIO} (4:3)."
-            )
+        try:
+            ratio_parts = self.aspect_ratio.split(":")
+            if len(ratio_parts) != 2:
+                raise ValueError("Aspect ratio must be in the format 'width:height'.")
+            width_ratio, height_ratio = map(int, ratio_parts)
+            calculated_aspect_ratio = width_ratio / height_ratio
+            if calculated_aspect_ratio < MIN_ASPECT_RATIO or calculated_aspect_ratio > MAX_ASPECT_RATIO:
+                raise ValueError(
+                    f"Unsupported aspect ratio: {calculated_aspect_ratio}. "
+                    f"Please use an aspect ratio between {MAX_ASPECT_RATIO} (16:9) and {MIN_ASPECT_RATIO} (4:3)."
+                )
+        except ValueError as e:
+            raise ValueError(f"Invalid aspect ratio format: {self.aspect_ratio}. {e}")
 
     def __post_init__(self):
         self._validate_aspect_ratio()
@@ -151,6 +155,22 @@ class Page:
         - Strips
         """
         lines = self.raw_md.splitlines()
+        headers = []
+        for line in lines:
+            header_level = get_header_level(line)
+            if 1 <= header_level <= 3:
+                headers.append((header_level, line.lstrip("#").strip()))
+            else:
+                break
+
+        for header_level, header_text in headers:
+            if header_level == 1:
+                self.h1 = header_text
+            elif header_level == 2:
+                self.h2 = header_text
+            elif header_level == 3:
+                self.h3 = header_text
+
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
         self.raw_md = "\n".join(lines).strip()
 
