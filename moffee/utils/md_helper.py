@@ -55,18 +55,16 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
     if type is None:
         return bool(re.match(r"^(?:<->|===|---|\*{3,}|-{3,}|_{3,})$", stripped_line))
     
-    if type == "<->":
-        return stripped_line == "<->"
-    elif type == "===":
-        return stripped_line == "==="
-    elif type == "---":
-        return stripped_line == "---"
-    elif type == "*":
-        return bool(re.match(r"^\*{3,}$", stripped_line))
+    if type == "<":
+        return bool(re.match(r"^\s*<->\s*$", stripped_line))
+    elif type == "=":
+        return bool(re.match(r"^\s*===\s*$", stripped_line))
     elif type == "-":
-        return bool(re.match(r"^-{3,}$", stripped_line))
+        return bool(re.match(r"^\s*---\s*$", stripped_line))
+    elif type == "*":
+        return bool(re.match(r"^\s*\*{3,}\s*$", stripped_line))
     elif type == "_":
-        return bool(re.match(r"^_{3,}$", stripped_line))
+        return bool(re.match(r"^\s*_{3,}\s*$", stripped_line))
     else:
         return False
 
@@ -117,7 +115,9 @@ def rm_comments(document: str) -> str:
     :param document: The document in markdown
     :return: The document with comments removed
     """
+    # Remove HTML comments
     document = re.sub(r"<!--[\s\S]*?-->", "", document)
+    # Remove single-line comments
     document = re.sub(r"^\s*%%.*$", "", document, flags=re.MULTILINE)
 
     return document.strip()
