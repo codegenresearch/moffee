@@ -27,7 +27,7 @@ class PageOption:
     slide_height: int = DEFAULT_SLIDE_HEIGHT
     layout: str = "content"
     resource_dir: str = "."
-    styles: Dict[str, Any] = field(default_factory=dict)
+    styles: dict = field(default_factory=dict)
 
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
@@ -113,9 +113,9 @@ class Page:
         """
         Split raw_md into chunk tree
         Chunk tree branches when in-page divider is met.
-        - adjacent "***"s create chunk with horizontal direction
-        - adjacent "___" create chunk with vertical direction
-        "___" possesses higher priority than "***"
+        - adjacent "<->"s create chunk with horizontal direction
+        - adjacent "===" create chunk with vertical direction
+        "===" possesses higher priority than "<->"
 
         :return: Root of the chunk tree
         """
@@ -132,12 +132,12 @@ class Page:
                     strs[-1] += line + "\n"
             return [Chunk(paragraph=s) for s in strs]
 
-        # collect "___"
-        vchunks = split_by_div(self.raw_md, "_")
-        # split by "***" if possible
+        # collect "==="
+        vchunks = split_by_div(self.raw_md, "===")
+        # split by "<->" if possible
         for i in range(len(vchunks)):
-            hchunks = split_by_div(vchunks[i].paragraph, "*")
-            if len(hchunks) > 1:  # found ***
+            hchunks = split_by_div(vchunks[i].paragraph, "<->")
+            if len(hchunks) > 1:  # found "<->"
                 vchunks[i] = Chunk(children=hchunks, type=Type.NODE)
 
         if len(vchunks) == 1:
@@ -151,7 +151,7 @@ class Page:
         Modifies raw_md in place.
 
         - Removes headings 1-3
-        - Stripes
+        - Strips
         """
 
         lines = self.raw_md.splitlines()
@@ -258,7 +258,7 @@ def composite(document: str) -> List[Page]:
 
     Splitting criteria:
     - New h1/h2/h3 header (except when following another header)
-    - "---" Divider (___, ***, +++ not count)
+    - "<->" Divider (===, +++ not count)
 
     :param document: Input markdown document as a string.
     :return: List of Page objects representing paginated slides
@@ -320,7 +320,7 @@ def composite(document: str) -> List[Page]:
             # Check if the next line is also a header
             create_page()
 
-        if is_divider(line, type="-") and not current_escaped:
+        if is_divider(line, type="<->") and not current_escaped:
             create_page()
             continue
 
