@@ -6,7 +6,7 @@ from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
 
-def read_options(document_path) -> PageOption:
+def read_options(document_path: str) -> PageOption:
     """Read frontmatter options from the document path."""
     with open(document_path, "r") as f:
         document = f.read()
@@ -52,26 +52,23 @@ def retrieve_structure(pages: List[Page]) -> dict:
 
     return {"page_meta": page_meta, "headings": headings}
 
-def render_jinja2(document: str, template_dir) -> str:
-    """Run jinja2 templating to create html."""
-    # Setup Jinja 2
+def render_jinja2(document: str, template_dir: str) -> str:
+    """Render document using Jinja2 template."""
+    # Setup Jinja 2 environment and load template
     env = Environment(loader=FileSystemLoader(template_dir))
     env.filters["markdown"] = md
+    template = env.get_template("index.html")
 
-    # Retrieve slide structure
+    # Retrieve slide structure and frontmatter options
     pages = composite(document)
     title = extract_title(document) or "Untitled"
-
-    # Parse frontmatter options
+    slide_struct = retrieve_structure(pages)
     _, options = parse_frontmatter(document)
-
-    # Unpack slide dimensions
-    width, height = options.computed_slide_size
 
     # Prepare data for template rendering
     data = {
         "title": title,
-        "struct": retrieve_structure(pages),
+        "struct": slide_struct,
         "slides": [
             {
                 "h1": page.h1,
@@ -83,12 +80,11 @@ def render_jinja2(document: str, template_dir) -> str:
             }
             for page in pages
         ],
-        "slide_width": width,
-        "slide_height": height,
+        "slide_width": options.computed_slide_size[0],
+        "slide_height": options.computed_slide_size[1],
     }
 
-    # Retrieve and render the template
-    template = env.get_template("index.html")
+    # Render the template with the prepared data
     return template.render(data)
 
 def build(
