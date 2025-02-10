@@ -1,5 +1,5 @@
 import pytest
-from moffee.compositor import composite, Direction, Type, is_divider
+from moffee.compositor import composite, Direction, Type, is_divider, rm_comments, contains_deco
 
 
 @pytest.fixture
@@ -136,7 +136,7 @@ Content 4
 def test_escaped_area_paging():
     doc = """
 Content 1
-
+bash
 ---
 Content 2
 
@@ -152,7 +152,7 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-
+bash
 ***
 Content 3
 
@@ -313,6 +313,42 @@ Hello
     assert pages[0].option.styles == {"background": "blue"}
     assert pages[0].option.default_h1 is True
     assert pages[1].option.default_h1 is False
+
+
+def test_divider_handling_in_escaped_area():
+    doc = """
+Content 1
+bash
+---
+Content 2
+---
+Content 3
+
+Content 4
+---
+Content 5
+"""
+    pages = composite(doc)
+    assert len(pages) == 2
+
+
+def test_divider_handling_in_escaped_area_with_multiple_types():
+    doc = """
+Content 1
+bash
+---
+Content 2
+===
+Content 3
+<-> 
+Content 4
+
+Content 5
+---
+Content 6
+"""
+    pages = composite(doc)
+    assert len(pages) == 2
 
 
 if __name__ == "__main__":
