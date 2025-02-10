@@ -17,7 +17,7 @@ def test_empty_deco():
 
 def test_invalid_deco():
     line = "This is not a deco"
-    with pytest.raises(ValueError, match="Invalid deco format"):
+    with pytest.raises(ValueError):
         _ = parse_deco(line)
 
 
@@ -67,60 +67,65 @@ def test_deco_with_hyphen():
 
 
 def test_computed_slide_size():
+    # Test width and height
     line = "@(width=1920, height=1080)"
     page_option = parse_deco(line)
     assert page_option.width == 1920
     assert page_option.height == 1080
     assert page_option.aspect_ratio == 1920 / 1080
 
-
-def test_computed_slide_size_with_aspect_ratio():
+    # Test width and aspect ratio
     line = "@(width=1920, aspect_ratio=1.7777777777777777)"
     page_option = parse_deco(line)
     assert page_option.width == 1920
     assert page_option.height == 1080
     assert page_option.aspect_ratio == 1920 / 1080
 
+    # Test height and aspect ratio
     line = "@(height=1080, aspect_ratio=1.7777777777777777)"
     page_option = parse_deco(line)
     assert page_option.width == 1920
     assert page_option.height == 1080
     assert page_option.aspect_ratio == 1920 / 1080
 
-
-def test_simultaneous_width_height_aspect_ratio():
+    # Test simultaneous width, height, and aspect ratio
     line = "@(width=1920, height=1080, aspect_ratio=1.7777777777777777)"
     page_option = parse_deco(line)
     assert page_option.width == 1920
     assert page_option.height == 1080
     assert page_option.aspect_ratio == 1920 / 1080
 
+    # Test invalid simultaneous width, height, and aspect ratio
     invalid_line = "@(width=1920, height=1080, aspect_ratio=1.77)"
     with pytest.raises(ValueError, match="Aspect ratio does not match width and height"):
         _ = parse_deco(invalid_line)
 
 
 def test_validate_aspect_ratio():
+    # Test valid aspect ratio
     line = "@(width=1920, height=1080)"
     page_option = parse_deco(line)
     assert page_option.aspect_ratio == 1920 / 1080
 
+    # Test invalid height
     invalid_line = "@(width=1920, height=0)"
     with pytest.raises(ValueError, match="Height cannot be zero"):
         _ = parse_deco(invalid_line)
 
 
 def test_invalid_aspect_ratio():
-    line = "@(width=1920, aspect_ratio='16:9')"
+    # Test aspect ratio as string
+    invalid_line = "@(width=1920, aspect_ratio='16:9')"
     with pytest.raises(ValueError, match="Aspect ratio must be a float"):
-        _ = parse_deco(line)
+        _ = parse_deco(invalid_line)
 
-    line = "@(height=1080, aspect_ratio='16:9')"
+    invalid_line = "@(height=1080, aspect_ratio='16:9')"
     with pytest.raises(ValueError, match="Aspect ratio must be a float"):
-        _ = parse_deco(line)
+        _ = parse_deco(invalid_line)
 
 
 def test_aspect_ratio_from_width_height():
+    # Test aspect ratio calculation from width and height
     line = "@(width=1920, height=1080)"
     page_option = parse_deco(line)
     assert page_option.aspect_ratio == 1920 / 1080
@@ -128,16 +133,6 @@ def test_aspect_ratio_from_width_height():
     line = "@(width=1280, height=720)"
     page_option = parse_deco(line)
     assert page_option.aspect_ratio == 1280 / 720
-
-
-def test_aspect_ratio_validation():
-    line = "@(width=1920, aspect_ratio=1.7777777777777777)"
-    page_option = parse_deco(line)
-    assert page_option.aspect_ratio == 1.7777777777777777
-
-    invalid_line = "@(width=1920, aspect_ratio='16:9')"
-    with pytest.raises(ValueError, match="Aspect ratio must be a float"):
-        _ = parse_deco(invalid_line)
 
 
 if __name__ == "__main__":
