@@ -3,7 +3,7 @@ from moffee.compositor import composite, Direction, Type, is_divider
 
 
 @pytest.fixture
-def sample_document() -> str:
+def sample_document():
     return """
 ---
 background-color: gray
@@ -54,12 +54,12 @@ This is line 12.
     """
 
 
-def test_paginate_creates_correct_number_of_pages(sample_document: str) -> None:
+def test_paginate_creates_correct_number_of_pages(sample_document):
     pages = composite(sample_document)
     assert len(pages) > 1, "Pagination should create multiple pages"
 
 
-def test_frontmatter_parsing(sample_document: str) -> None:
+def test_frontmatter_parsing(sample_document):
     pages = composite(sample_document)
     assert pages[0].option.layout == "split"
     assert pages[0].option.default_h1 is True
@@ -67,14 +67,14 @@ def test_frontmatter_parsing(sample_document: str) -> None:
     assert pages[0].option.styles == {"background-color": "gray"}
 
 
-def test_style_overwrite(sample_document: str) -> None:
+def test_style_overwrite(sample_document):
     pages = composite(sample_document)
     assert pages[1].option.styles == {"background-color": "yellow"}
     assert pages[0].option.styles == {"background-color": "gray"}
 
 
-def test_header_inheritance() -> None:
-    doc: str = """
+def test_header_inheritance():
+    doc = """
 # Main Title
 Content
 ## Subtitle
@@ -91,8 +91,8 @@ Even more content
     assert pages[2].h3 == "Subheader"
 
 
-def test_page_splitting_on_headers() -> None:
-    doc: str = """
+def test_page_splitting_on_headers():
+    doc = """
 # Header 1
 Content 1
 ## Header 2
@@ -107,8 +107,8 @@ Content 3
     assert pages[2].h1 == "New Header 1"
 
 
-def test_page_splitting_on_dividers() -> None:
-    doc: str = """
+def test_page_splitting_on_dividers():
+    doc = """
 Content 1
 ---
 Content 2
@@ -119,8 +119,8 @@ Content 3
     assert len(pages) == 2
 
 
-def test_page_splitting_on_dividers_with_different_types() -> None:
-    doc: str = """
+def test_page_splitting_on_dividers_with_different_types():
+    doc = """
 Content 1
 ---
 Content 2
@@ -133,8 +133,8 @@ Content 4
     assert len(pages) == 4
 
 
-def test_escaped_area_paging() -> None:
-    doc: str = """
+def test_escaped_area_paging():
+    doc = """
 Content 1
 bash
 ---
@@ -147,8 +147,8 @@ Content 3
     assert len(pages) == 1
 
 
-def test_escaped_area_chunking() -> None:
-    doc: str = """
+def test_escaped_area_chunking():
+    doc = """
 Content 1
 ---
 Content 2
@@ -162,8 +162,8 @@ Content 3
     assert len(pages[1].chunk.children) == 0
 
 
-def test_title_and_subtitle() -> None:
-    doc: str = """
+def test_title_and_subtitle():
+    doc = """
 # Title
 ## Subtitle
 # Title2
@@ -178,8 +178,8 @@ Content
     assert pages[1].title == "Title2"
 
 
-def test_adjacent_headings_same_level() -> None:
-    doc: str = """
+def test_adjacent_headings_same_level():
+    doc = """
 # Title
 ## Subtitle
 ## Subtitle2
@@ -192,8 +192,8 @@ def test_adjacent_headings_same_level() -> None:
     assert pages[1].subtitle == "Heading"
 
 
-def test_chunking_trivial() -> None:
-    doc: str = """
+def test_chunking_trivial():
+    doc = """
 Paragraph 1
 
 Paragraph 2
@@ -209,8 +209,8 @@ Paragraph 4
     assert chunk.paragraph.strip() == doc.strip()
 
 
-def test_chunking_vertical() -> None:
-    doc: str = """
+def test_chunking_vertical():
+    doc = """
 Paragraph 1
 ___
 
@@ -224,8 +224,8 @@ Paragraph 2
     assert chunk.children[0].type == Type.PARAGRAPH
 
 
-def test_chunking_horizontal() -> None:
-    doc: str = """
+def test_chunking_horizontal():
+    doc = """
 Paragraph 1
 ***
 
@@ -240,8 +240,8 @@ Paragraph 2
     assert chunk.children[0].type == Type.PARAGRAPH
 
 
-def test_chunking_hybrid() -> None:
-    doc: str = """
+def test_chunking_hybrid():
+    doc = """
 Other Pages
 ---
 Paragraph 1
@@ -266,8 +266,8 @@ Paragraph 4
     assert len(next_chunk.children) == 3
 
 
-def test_empty_lines_handling() -> None:
-    doc: str = """
+def test_empty_lines_handling():
+    doc = """
 # Title
 
 Content with empty line above
@@ -277,8 +277,8 @@ Content with empty line above
     assert pages[0].option.styles == {}
 
 
-def test_deco_handling() -> None:
-    doc: str = """
+def test_deco_handling():
+    doc = """
 ---
 default_h1: true
 ---
@@ -293,8 +293,8 @@ Hello
     assert pages[0].option.styles == {"background": "blue"}
 
 
-def test_multiple_deco() -> None:
-    doc: str = """
+def test_multiple_deco():
+    doc = """
 ---
 default_h1: true
 ---
