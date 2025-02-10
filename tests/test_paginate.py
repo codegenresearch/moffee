@@ -136,7 +136,7 @@ Content 4
 def test_escaped_area_paging():
     doc = """
 Content 1
-
+bash
 ---
 Content 2
 
@@ -152,7 +152,7 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-
+bash
 ***
 Content 3
 
@@ -323,7 +323,7 @@ Hello
 def test_divider_handling_in_escaped_area():
     doc = """
 Content 1
-
+bash
 ---
 Content 2
 ---
@@ -332,7 +332,6 @@ Content 3
 Content 4
 ---
 Content 5
-
 """
     pages = composite(doc)
     assert len(pages) == 1
@@ -341,7 +340,7 @@ Content 5
 def test_divider_handling_in_escaped_area_with_multiple_types():
     doc = """
 Content 1
-
+bash
 ---
 Content 2
 ===
@@ -352,7 +351,6 @@ Content 4
 Content 5
 ---
 Content 6
-
 """
     pages = composite(doc)
     assert len(pages) == 1
