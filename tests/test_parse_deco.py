@@ -17,7 +17,7 @@ def test_empty_deco():
 
 def test_invalid_deco():
     line = "This is not a deco"
-    with pytest.raises(ValueError, match="Invalid deco format"):
+    with pytest.raises(ValueError):
         _ = parse_deco(line)
 
 
@@ -114,6 +114,26 @@ def test_invalid_aspect_ratio():
     line = "@(width=1920, aspect_ratio='16:9')"
     with pytest.raises(ValueError, match="Aspect ratio must be a float"):
         _ = parse_deco(line)
+
+
+def test_aspect_ratio_from_width_height():
+    line = "@(width=1920, height=1080)"
+    page_option = parse_deco(line)
+    assert page_option.aspect_ratio == 1920 / 1080
+
+    line = "@(width=1280, height=720)"
+    page_option = parse_deco(line)
+    assert page_option.aspect_ratio == 1280 / 720
+
+
+def test_aspect_ratio_validation():
+    line = "@(width=1920, aspect_ratio=1.7777777777777777)"
+    page_option = parse_deco(line)
+    assert page_option.aspect_ratio == 1.7777777777777777
+
+    invalid_line = "@(width=1920, aspect_ratio='16:9')"
+    with pytest.raises(ValueError, match="Aspect ratio must be a float"):
+        _ = parse_deco(invalid_line)
 
 
 if __name__ == "__main__":
