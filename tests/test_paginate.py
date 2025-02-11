@@ -124,7 +124,7 @@ Content 4
 def test_escaped_area_paging():
     doc = """
 Content 1
-bash
+
 ---
 Content 2
 
@@ -140,7 +140,7 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-bash
+
 ***
 Content 3
 
