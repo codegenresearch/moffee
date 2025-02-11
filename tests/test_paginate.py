@@ -1,9 +1,9 @@
 import pytest
-from moffee.compositor import composite, Direction, Type
+from moffee.compositor import composite, Direction, Type, is_divider
 
 
 @pytest.fixture
-def sample_document():
+def sample_document() -> str:
     return """
 ---
 background-color: gray
@@ -54,12 +54,12 @@ This is line 12.
     """
 
 
-def test_paginate_creates_correct_number_of_pages(sample_document):
+def test_paginate_creates_correct_number_of_pages(sample_document: str) -> None:
     pages = composite(sample_document)
     assert len(pages) > 1, "Pagination should create multiple pages"
 
 
-def test_frontmatter_parsing(sample_document):
+def test_frontmatter_parsing(sample_document: str) -> None:
     pages = composite(sample_document)
     assert pages[0].option.layout == "split"
     assert pages[0].option.default_h1 is True
@@ -67,14 +67,14 @@ def test_frontmatter_parsing(sample_document):
     assert pages[0].option.styles == {"background-color": "gray"}
 
 
-def test_style_overwrite(sample_document):
+def test_style_overwrite(sample_document: str) -> None:
     pages = composite(sample_document)
     assert pages[1].option.styles == {"background-color": "yellow"}
     assert pages[0].option.styles == {"background-color": "gray"}
 
 
-def test_header_inheritance():
-    doc = """
+def test_header_inheritance() -> None:
+    doc: str = """
 # Main Title
 Content
 ## Subtitle
@@ -91,8 +91,8 @@ Even more content
     assert pages[2].h3 == "Subheader"
 
 
-def test_page_splitting_on_headers():
-    doc = """
+def test_page_splitting_on_headers() -> None:
+    doc: str = """
 # Header 1
 Content 1
 ## Header 2
@@ -107,49 +107,63 @@ Content 3
     assert pages[2].h1 == "New Header 1"
 
 
-def test_page_splitting_on_dividers():
-    doc = """
+def test_page_splitting_on_dividers() -> None:
+    doc: str = """
 Content 1
 ---
 Content 2
-<->
+***
 Content 3
     """
     pages = composite(doc)
     assert len(pages) == 2
 
 
-def test_escaped_area_paging():
-    doc = """
+def test_page_splitting_on_dividers_with_different_types() -> None:
+    doc: str = """
 Content 1
-```bash
 ---
 Content 2
-```
-<->
+===
+Content 3
+<-> 
+Content 4
+    """
+    pages = composite(doc)
+    assert len(pages) == 4
+
+
+def test_escaped_area_paging() -> None:
+    doc: str = """
+Content 1
+bash
+---
+Content 2
+
+***
 Content 3
     """
     pages = composite(doc)
     assert len(pages) == 1
 
 
-def test_escaped_area_chunking():
-    doc = """
+def test_escaped_area_chunking() -> None:
+    doc: str = """
 Content 1
 ---
 Content 2
-```bash
-<->
+bash
+***
 Content 3
-```
+
     """
     pages = composite(doc)
     assert len(pages) == 2
     assert len(pages[1].chunk.children) == 0
 
 
-def test_title_and_subtitle():
-    doc = """
+def test_title_and_subtitle() -> None:
+    doc: str = """
 # Title
 ## Subtitle
 # Title2
@@ -164,8 +178,8 @@ Content
     assert pages[1].title == "Title2"
 
 
-def test_adjacent_headings_same_level():
-    doc = """
+def test_adjacent_headings_same_level() -> None:
+    doc: str = """
 # Title
 ## Subtitle
 ## Subtitle2
@@ -178,8 +192,8 @@ def test_adjacent_headings_same_level():
     assert pages[1].subtitle == "Heading"
 
 
-def test_chunking_trivial():
-    doc = """
+def test_chunking_trivial() -> None:
+    doc: str = """
 Paragraph 1
 
 Paragraph 2
@@ -195,10 +209,10 @@ Paragraph 4
     assert chunk.paragraph.strip() == doc.strip()
 
 
-def test_chunking_vertical():
-    doc = """
+def test_chunking_vertical() -> None:
+    doc: str = """
 Paragraph 1
-===
+___
 
 Paragraph 2
     """
@@ -210,13 +224,13 @@ Paragraph 2
     assert chunk.children[0].type == Type.PARAGRAPH
 
 
-def test_chunking_horizontal():
-    doc = """
+def test_chunking_horizontal() -> None:
+    doc: str = """
 Paragraph 1
-<->
+***
 
 Paragraph 2
-<->
+***
     """
     pages = composite(doc)
     chunk = pages[0].chunk
@@ -226,16 +240,16 @@ Paragraph 2
     assert chunk.children[0].type == Type.PARAGRAPH
 
 
-def test_chunking_hybrid():
-    doc = """
+def test_chunking_hybrid() -> None:
+    doc: str = """
 Other Pages
 ---
 Paragraph 1
-===
+___
 Paragraph 2
-<->
+***
 Paragraph 3
-<->
+***
 Paragraph 4
     """
     pages = composite(doc)
@@ -247,13 +261,13 @@ Paragraph 4
     assert len(chunk.children[0].children) == 0
     assert chunk.children[0].type == Type.PARAGRAPH
     assert chunk.children[0].paragraph.strip() == "Paragraph 1"
-    next = chunk.children[1]
-    assert next.direction == Direction.HORIZONTAL
-    assert len(next.children) == 3
+    next_chunk = chunk.children[1]
+    assert next_chunk.direction == Direction.HORIZONTAL
+    assert len(next_chunk.children) == 3
 
 
-def test_empty_lines_handling():
-    doc = """
+def test_empty_lines_handling() -> None:
+    doc: str = """
 # Title
 
 Content with empty line above
@@ -263,8 +277,8 @@ Content with empty line above
     assert pages[0].option.styles == {}
 
 
-def test_deco_handling():
-    doc = """
+def test_deco_handling() -> None:
+    doc: str = """
 ---
 default_h1: true
 ---
@@ -279,8 +293,8 @@ Hello
     assert pages[0].option.styles == {"background": "blue"}
 
 
-def test_multiple_deco():
-    doc = """
+def test_multiple_deco() -> None:
+    doc: str = """
 ---
 default_h1: true
 ---
