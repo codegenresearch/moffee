@@ -48,6 +48,8 @@ def test_is_divider():
     assert is_divider("===", type="=") is True
     assert is_divider("<->", type="=") is False
     assert is_divider("===", type="<") is False
+    assert is_divider("===", type=None) is True
+    assert is_divider("<->", type=None) is True
 
 
 def test_contains_image():
@@ -79,6 +81,10 @@ def test_extract_title():
     assert extract_title("#  Title with spaces  \nContent") == "Title with spaces"
     multi_para = "Para 1\n\nPara 2\n\n# Actual Title\nContent"
     assert extract_title(multi_para) == "Actual Title"
+    assert extract_title("# Title\n\n## Subtitle\n\nContent") == "Title"
+    assert extract_title("## Subtitle\n\n# Title\n\nContent") == "Subtitle"
+    assert extract_title("# Title\n\nContent\n\n## Subtitle") == "Title"
+    assert extract_title("## Subtitle\n\nContent\n\n# Title") == "Subtitle"
 
 
 def multi_strip(text):
