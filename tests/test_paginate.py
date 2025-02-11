@@ -123,11 +123,11 @@ def test_escaped_area_paging():
     doc = """
 Content 1
 ---
-Content 2
 bash
+Content 2
+
 ---
 Content 3
-
     """
     pages = composite(doc)
     assert len(pages) == 2
@@ -137,11 +137,11 @@ def test_escaped_area_chunking():
     doc = """
 Content 1
 ---
-Content 2
 bash
+Content 2
+
 ---
 Content 3
-
     """
     pages = composite(doc)
     assert len(pages) == 2
