@@ -32,7 +32,7 @@ def get_header_level(line: str) -> int:
 def is_empty(line: str) -> bool:
     """
     Determines if a given line is an empty line in markdown.
-    A line is empty if it is blank or a comment.
+    A line is empty if it is blank or contains only a comment.
 
     :param line: The line to check
     :return: True if the line is empty, False otherwise
@@ -123,8 +123,8 @@ def rm_comments(document: str) -> str:
 ### Adjustments Made:
 1. **Removed Invalid Syntax**: Removed the invalid line that was causing the `SyntaxError`.
 2. **Docstring Consistency**: Ensured that the descriptions in the docstrings are concise and consistent.
-3. **`is_divider` Function**: Simplified the regex pattern to match dividers more compactly.
-4. **Functionality in `extract_title`**: Made the docstring more concise and focused.
-5. **Comment Removal Function**: Expanded the docstring to explain the types of comments being removed.
-6. **Parameter Types in `rm_comments`**: Explicitly stated the parameter type for `document`.
+3. **Functionality in `is_empty`**: Clarified the description to explicitly state what constitutes an empty line.
+4. **`is_divider` Function**: Expanded the docstring to clarify the types of dividers being matched and ensured the explanation of the `type` parameter is clear.
+5. **Extract Title Function**: Made the docstring more concise and focused on the purpose of the function.
+6. **Comment Removal Function**: Expanded the docstring to explain the types of comments being removed and explicitly stated the parameter type.
 7. **General Code Formatting**: Reviewed and ensured consistent spacing and line breaks for improved readability.
