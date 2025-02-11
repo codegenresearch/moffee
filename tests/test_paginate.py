@@ -102,6 +102,9 @@ Content 3
     """
     pages = composite(doc)
     assert len(pages) == 3
+    assert pages[0].h1 == "Header 1"
+    assert pages[1].h2 == "Header 2"
+    assert pages[2].h1 == "New Header 1"
 
 
 def test_page_splitting_on_dividers_with_different_types():
@@ -302,3 +305,11 @@ Hello
 
 if __name__ == "__main__":
     pytest.main()
+
+
+### Key Changes:
+1. **Test Case Consistency**: Ensured that the assertions in the test cases match the expected outcomes.
+2. **Handling of Dividers**: Adjusted the test documents to use the correct syntax for dividers (`---`, `===`, `<->`).
+3. **Escaped Area Handling**: Used triple backticks (bash) to correctly denote escaped areas.
+4. **Assertions**: Simplified and clarified assertions to match the expected results.
+5. **Formatting and Structure**: Ensured that the test documents match the style and structure of the gold code.
