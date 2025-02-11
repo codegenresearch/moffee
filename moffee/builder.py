@@ -1,13 +1,13 @@
 from typing import List
 import os
 from jinja2 import Environment, FileSystemLoader
-from moffee.compositor import Page, composite, parse_frontmatter
+from moffee.compositor import Page, PageOption, composite, parse_frontmatter
 from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
 
 
-def read_options(document_path) -> dict:
+def read_options(document_path) -> PageOption:
     """Read frontmatter options from the document path"""
     with open(document_path, "r") as f:
         document = f.read()
@@ -55,7 +55,7 @@ def retrieve_structure(pages: List[Page]) -> dict:
     return {"page_meta": page_meta, "headings": headings}
 
 
-def render_jinja2(document: str, template_dir) -> str:
+def render_jinja2(document: str, template_dir, options: PageOption) -> str:
     """Run jinja2 templating to create html"""
     # Setup Jinja 2
     env = Environment(loader=FileSystemLoader(template_dir))
@@ -69,13 +69,13 @@ def render_jinja2(document: str, template_dir) -> str:
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
 
-    # Parse frontmatter to get options
-    _, options = parse_frontmatter(document)
-    slide_width, slide_height = options.get("computed_slide_size", ("1024px", "768px"))
+    # Access slide dimensions directly from options
+    width = getattr(options, "computed_slide_size", ("1024px", "768px"))[0]
+    height = getattr(options, "computed_slide_size", ("1024px", "768px"))[1]
 
     data = {
-        "slide_width": slide_width,
-        "slide_height": slide_height,
+        "width": width,
+        "height": height,
         "title": title,
         "struct": slide_struct,
         "slides": [
@@ -103,8 +103,8 @@ def build(
     asset_dir = os.path.join(output_dir, "assets")
 
     merge_directories(template_dir, output_dir, theme_dir)
-    output_html = render_jinja2(document, output_dir)
     options = read_options(document_path)
+    output_html = render_jinja2(document, output_dir, options)
     output_html = redirect_paths(
         output_html, document_path=document_path, resource_dir=options.resource_dir
     )
@@ -113,3 +113,11 @@ def build(
     output_file = os.path.join(output_dir, f"index.html")
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(output_html)
+
+
+### Key Changes:
+1. **Return Type of `read_options`:** Specified the return type as `PageOption`.
+2. **Variable Naming Consistency:** Changed `slide_width` and `slide_height` to `width` and `height`.
+3. **Order of Operations:** Reversed the order of calling `read_options` and `render_jinja2` in the `build` function.
+4. **Data Structure in `render_jinja2`:** Adjusted the order of keys in the `data` dictionary.
+5. **Accessing `computed_slide_size`:** Used `getattr` to safely access `computed_slide_size` from the `PageOption` object.
