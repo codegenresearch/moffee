@@ -661,9 +661,9 @@ Content
 
 ### Key Changes Made:
 1. **Removed Unterminated String Literals**: Ensured all string literals and comments are properly terminated.
-2. **Aspect Ratio Handling**: Ensured the logic for checking and calculating dimensions based on aspect ratio is consistent with the gold code.
-3. **Error Messages**: Made error messages more specific and informative.
-4. **YAML Front Matter Parsing**: Streamlined the parsing of YAML front matter to align with the gold code's approach.
+2. **Aspect Ratio Handling**: Ensured the logic for calculating the slide dimensions based on the aspect ratio is consistent with the gold code.
+3. **Error Handling**: Made error messages specific and informative.
+4. **YAML Front Matter Parsing**: Streamlined the parsing of YAML front matter to align with the gold code's method.
 5. **Chunk Splitting Logic**: Simplified and reviewed the logic for splitting raw markdown into chunks.
 6. **Code Comments and Documentation**: Refined comments for clarity and conciseness.
 7. **Testing Coverage**: Ensured test cases cover all edge cases and scenarios as seen in the gold code.
