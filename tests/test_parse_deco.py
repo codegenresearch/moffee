@@ -74,5 +74,52 @@ def test_computed_slide_size():
     assert option.aspect_ratio == 1024 / 768
 
 
+def test_computed_slide_size_with_aspect_ratio():
+    line = "@(width=1920, height=1080)"
+    option = parse_deco(line)
+    assert option.width == 1920
+    assert option.height == 1080
+    assert option.aspect_ratio == 1920 / 1080
+
+
+def test_computed_slide_size_with_non_standard_aspect_ratio():
+    line = "@(width=800, height=600)"
+    option = parse_deco(line)
+    assert option.width == 800
+    assert option.height == 600
+    assert option.aspect_ratio == 800 / 600
+
+
+def test_computed_slide_size_with_missing_width():
+    line = "@(height=768)"
+    with pytest.raises(ValueError, match="Width and height must both be provided"):
+        _ = parse_deco(line)
+
+
+def test_computed_slide_size_with_missing_height():
+    line = "@(width=1024)"
+    with pytest.raises(ValueError, match="Width and height must both be provided"):
+        _ = parse_deco(line)
+
+
+def test_computed_slide_size_with_invalid_width():
+    line = "@(width=abc, height=768)"
+    with pytest.raises(ValueError, match="Width and height must be integers"):
+        _ = parse_deco(line)
+
+
+def test_computed_slide_size_with_invalid_height():
+    line = "@(width=1024, height=xyz)"
+    with pytest.raises(ValueError, match="Width and height must be integers"):
+        _ = parse_deco(line)
+
+
 if __name__ == "__main__":
     pytest.main()
+
+
+### Key Changes:
+1. **Updated `PageOption` Class**: Ensure that the `PageOption` class includes `width` and `height` attributes.
+2. **Modified `parse_deco` Function**: Update the `parse_deco` function to correctly parse `width` and `height` values and assign them to the `PageOption` instance.
+3. **Additional Tests**: Added tests to cover various scenarios for computed slide size, including error handling for missing or invalid dimensions.
+4. **Consistent Variable Naming and Formatting**: Ensured variable names are consistent and descriptive, and maintained consistent formatting and style.
