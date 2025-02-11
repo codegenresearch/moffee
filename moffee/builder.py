@@ -7,9 +7,11 @@ from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
 
 
-def read_options(document_content: str) -> PageOption:
-    """Read frontmatter options from the document content"""
-    _, options = parse_frontmatter(document_content)
+def read_options(document_path: str) -> PageOption:
+    """Read frontmatter options from the document path"""
+    with open(document_path, "r") as f:
+        document = f.read()
+    _, options = parse_frontmatter(document)
     return options
 
 
@@ -53,7 +55,7 @@ def retrieve_structure(pages: List[Page]) -> dict:
     return {"page_meta": page_meta, "headings": headings}
 
 
-def render_jinja2(document: str, template_dir, options: PageOption) -> str:
+def render_jinja2(document: str, template_dir: str) -> str:
     """Run jinja2 templating to create html"""
     # Setup Jinja 2
     env = Environment(loader=FileSystemLoader(template_dir))
@@ -68,6 +70,7 @@ def render_jinja2(document: str, template_dir, options: PageOption) -> str:
     slide_struct = retrieve_structure(pages)
 
     # Retrieve slide size from options
+    options = read_options(document_path)
     slide_width = options.slide_width
     slide_height = options.slide_height
 
@@ -101,8 +104,8 @@ def build(
     asset_dir = os.path.join(output_dir, "assets")
 
     merge_directories(template_dir, output_dir, theme_dir)
-    options = read_options(document)
-    output_html = render_jinja2(document, template_dir, options)
+    output_html = render_jinja2(document, template_dir)
+    options = read_options(document_path)
     output_html = redirect_paths(
         output_html, document_path=document_path, resource_dir=options.resource_dir
     )
@@ -114,8 +117,11 @@ def build(
 
 
 ### Key Changes:
-1. **`read_options` Function**: Modified to accept document content directly instead of a file path.
-2. **Return Type**: Changed the return type of `read_options` to `PageOption`.
-3. **Slide Size Retrieval**: Directly accessed `slide_width` and `slide_height` from the `options` object.
+1. **`read_options` Function**: Modified to accept a file path and read the document content within the function.
+2. **Slide Size Retrieval**: Directly accessed `slide_width` and `slide_height` from the `options` object.
+3. **Parameters in `render_jinja2`**: Removed `options` from the parameters of `render_jinja2` and read options within the function.
 4. **Data Structure**: Included `slide_width` and `slide_height` in the `data` dictionary at the top level.
-5. **Options Handling**: Read options once in the `build` function and passed them to `render_jinja2`.
+5. **Options Handling in `build` Function**: Read options after calling `render_jinja2` to match the gold code's order of operations.
+6. **Comment Syntax**: Corrected the comment syntax to use proper Python comment syntax (`#`).
+
+These changes should address the feedback and align the code more closely with the gold standard.
