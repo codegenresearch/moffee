@@ -43,6 +43,11 @@ def test_is_divider():
     assert is_divider("* * *", type="*") is False
     assert is_divider("<->") is True
     assert is_divider("===", type="=") is True
+    assert is_divider("==", type="=") is False
+    assert is_divider("===", type="*") is False
+    assert is_divider("  ===  ", type="=") is True
+    assert is_divider("  ***  ", type="*") is True
+    assert is_divider("  ___  ", type="_") is True
 
 
 def test_contains_image():
@@ -62,6 +67,9 @@ def test_contains_deco():
     assert contains_deco("@()") is True  # empty deco
     assert contains_deco("@(key1=value1, key2=value2)") is True
     assert contains_deco("@(key1=value1, key2=value2, key3=value3)") is True
+    assert contains_deco("@(key1=value1, key2=value2, key3=value3, key4=value4)") is True
+    assert contains_deco("@(key1=value1, key2=value2, key3=value3, key4=value4, key5=value5)") is True
+    assert contains_deco("@(key1=value1, key2=value2, key3=value3, key4=value4, key5=value5, key6=value6)") is True
 
 
 def test_extract_title():
