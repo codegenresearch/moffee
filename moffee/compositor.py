@@ -372,7 +372,7 @@ def composite(document: str) -> List[Page]:
 
 
 ### Key Changes Made:
-1. **Removed Improper Comment**: Removed the improperly formatted comment that was causing the `SyntaxError`.
+1. **Removed Improper Comment**: Removed any improperly formatted comments that could cause syntax errors.
 2. **Import Organization**: Consolidated and organized import statements to avoid redundancy.
 3. **Type Annotations**: Ensured type annotations are consistent, especially for the `styles` attribute in the `PageOption` class.
 4. **String Formatting**: Ensured consistent error message formatting.
