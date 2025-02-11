@@ -18,7 +18,7 @@ def test_empty_deco():
 
 def test_invalid_deco():
     line = "This is not a deco"
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid deco format"):
         _ = parse_deco(line)
 
 
@@ -68,38 +68,36 @@ def test_deco_with_hyphen():
 
 
 def test_computed_slide_size():
-    option1 = PageOption(width=1024, height=768)
-    assert option1.styles == {"width": "1024", "height": "768"}
-    assert option1.aspect_ratio == 1024 / 768
+    page_option1 = PageOption(width=1024, height=768)
+    assert page_option1.styles == {"width": "1024", "height": "768"}
+    assert page_option1.computed_slide_size == (1024, 768)
 
-    option2 = PageOption(width=800, height=600)
-    assert option2.styles == {"width": "800", "height": "600"}
-    assert option2.aspect_ratio == 800 / 600
+    page_option2 = PageOption(width=800, height=600)
+    assert page_option2.styles == {"width": "800", "height": "600"}
+    assert page_option2.computed_slide_size == (800, 600)
 
-    option3 = PageOption(width=1280, height=720)
-    assert option3.styles == {"width": "1280", "height": "720"}
-    assert option3.aspect_ratio == 1280 / 720
+    page_option3 = PageOption(width=1280, height=720)
+    assert page_option3.styles == {"width": "1280", "height": "720"}
+    assert page_option3.computed_slide_size == (1280, 720)
 
-    option4 = PageOption(width=1920, height=1080)
-    assert option4.styles == {"width": "1920", "height": "1080"}
-    assert option4.aspect_ratio == 1920 / 1080
+    page_option4 = PageOption(width=1920, height=1080)
+    assert page_option4.styles == {"width": "1920", "height": "1080"}
+    assert page_option4.computed_slide_size == (1920, 1080)
 
-    option5 = PageOption(width=1600, height=900)
-    assert option5.styles == {"width": "1600", "height": "900"}
-    assert option5.aspect_ratio == 1600 / 900
+    page_option5 = PageOption(width=1600, height=900)
+    assert page_option5.styles == {"width": "1600", "height": "900"}
+    assert page_option5.computed_slide_size == (1600, 900)
 
 
 def test_aspect_ratio_handling():
-    option = PageOption(width=1600, height=900)
-    assert option.aspect_ratio == 1600 / 900
+    page_option = PageOption(width=1600, height=900)
+    assert page_option.aspect_ratio == 1600 / 900
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Width and height must be positive numbers"):
         _ = PageOption(width=0, height=900)
-    assert str(excinfo.value) == "Width and height must be positive numbers"
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Width and height must be positive numbers"):
         _ = PageOption(width=1600, height=0)
-    assert str(excinfo.value) == "Width and height must be positive numbers"
 
 
 if __name__ == "__main__":
@@ -107,9 +105,9 @@ if __name__ == "__main__":
 
 
 ### Key Changes:
-1. **Removed Invalid Comment**: Ensured there are no invalid comments that could cause syntax errors.
-2. **Error Handling**: Simplified `test_invalid_deco` to match the gold code's approach by not asserting the error message.
-3. **Computed Slide Size Tests**: Revised `test_computed_slide_size` to use `PageOption` directly to check the computed slide size.
-4. **Aspect Ratio Handling**: Added `test_aspect_ratio_handling` to cover aspect ratio handling and error cases.
-5. **Consistency in Assertions**: Ensured assertions are consistent and match the expected structure.
+1. **Removed Unterminated String Literal**: Ensured there are no unterminated string literals in comments.
+2. **Error Handling**: Used the `match` parameter in `pytest.raises` to validate error messages.
+3. **Computed Slide Size Tests**: Used `computed_slide_size` as a property to check the expected output.
+4. **Consistency in Variable Naming**: Used `page_option` as a variable name in the computed slide size tests.
+5. **Aspect Ratio Handling**: Included detailed tests for aspect ratio handling.
 6. **Formatting and Spacing**: Ensured consistent formatting and spacing throughout the code.
