@@ -114,7 +114,6 @@ def build(
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(output_html)
 
-
 # Key Changes:
 # 1. **Function Parameters**: Ensured that `render_jinja2` function parameters are consistent with the gold code.
 # 2. **Options Handling**: Retrieved options directly from the frontmatter within the `render_jinja2` function.
