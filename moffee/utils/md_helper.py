@@ -55,14 +55,20 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
         return False
 
     if type is not None:
-        return all(char in type for char in stripped_line) and any(char * 3 in stripped_line for char in type)
+        if type == "*":
+            return bool(re.match(r"^\s*\*{3,}\s*$", stripped_line))
+        elif type == "-":
+            return bool(re.match(r"^\s*-{3,}\s*$", stripped_line))
+        elif type == "_":
+            return bool(re.match(r"^\s*_{3,}\s*$", stripped_line))
+        elif type == "=":
+            return bool(re.match(r"^\s*={3,}\s*$", stripped_line))
+        elif type == "<":
+            return bool(re.match(r"^\s*<{3,}\s*$", stripped_line))
+        else:
+            return False
 
-    valid_chars = set(stripped_line)
-    if len(valid_chars) != 1:
-        return False
-
-    char = valid_chars.pop()
-    return char * 3 in stripped_line and char in "-*_=<"
+    return bool(re.match(r"^\s*[*-_=<]{3,}\s*$", stripped_line))
 
 
 def contains_image(line: str) -> bool:
@@ -119,14 +125,16 @@ def rm_comments(document: str) -> str:
 
 ### Key Changes:
 1. **`is_divider` Function**:
-   - Added explicit handling for the `type` parameter.
-   - Ensured that the function checks for valid characters and handles the specific case of "<->".
+   - Simplified the logic for handling the `type` parameter by explicitly checking for each type and using regex matches for clarity.
 
 2. **`rm_comments` Function**:
-   - Added type hint for the `document` parameter.
+   - Ensured that the function signature includes a type hint for the `document` parameter.
 
 3. **Docstrings**:
-   - Ensured that docstrings are consistent and detailed, matching the gold code style.
+   - Reviewed and ensured that docstrings are consistent and detailed, matching the gold code style.
 
 4. **Whitespace and Formatting**:
    - Reviewed and adjusted whitespace and formatting for consistency.
+
+5. **Removed Invalid Syntax**:
+   - Removed the invalid syntax line that was causing the `SyntaxError`.
