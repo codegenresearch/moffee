@@ -130,7 +130,7 @@ class Page:
                     strs.append("\n")
                 else:
                     strs[-1] += line + "\n"
-            return [Chunk(paragraph=s) for s in strs]
+            return [Chunk(paragraph=s.strip()) for s in strs if s.strip()]
 
         # collect "==="
         vchunks = split_by_div(self.raw_md, "=")
@@ -190,7 +190,7 @@ def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
         name = field.name
         if name in yaml_data:
             setattr(option, name, yaml_data.pop(name))
-    option.styles = yaml_data
+    option.styles.update(yaml_data)
 
     return content, option
 
@@ -262,7 +262,6 @@ def composite(document: str) -> List[Page]:
     - "<->" Divider (===, ***, +++ not count)
 
     :param document: Input markdown document as a string.
-    :param document_path: Optional string, will be used to redirect url in documents if given.
     :return: List of Page objects representing paginated slides
     """
     pages: List[Page] = []
@@ -292,7 +291,7 @@ def composite(document: str) -> List[Page]:
                 raw_md += "\n" + line
 
         page = Page(
-            raw_md=raw_md,
+            raw_md=raw_md.strip(),
             option=local_option,
             h1=current_h1,
             h2=current_h2,
@@ -303,7 +302,7 @@ def composite(document: str) -> List[Page]:
         current_page_lines = []
         current_h1 = current_h2 = current_h3 = None
 
-    for _, line in enumerate(lines):
+    for line in lines:
         # update current env stack
         if line.strip().startswith(""):
             current_escaped = not current_escaped
