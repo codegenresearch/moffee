@@ -98,69 +98,62 @@ def multi_strip(text):
 
 def test_remove_html_comments():
     """Test if the function correctly removes HTML comments from a Markdown document."""
-    markdown = (
-        "# Title\n"
-        "<!-- This is a comment -->\n"
-        "Normal text.\n"
-        "<!--\n"
-        "This is a\n"
-        "multi-line comment\n"
-        "-->\n"
-        "More text.\n"
-    )
-    expected = (
-        "# Title\n"
-        "Normal text.\n"
-        "More text.\n"
-    )
+    markdown = """# Title
+<!-- This is a comment -->
+Normal text.
+<!--
+This is a
+multi-line comment
+-->
+More text.
+"""
+    expected = """# Title
+Normal text.
+More text.
+"""
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
 def test_remove_single_line_comments():
     """Test if the function correctly removes single-line comments from a Markdown document."""
-    markdown = (
-        "# Title\n"
-        "%% This is a comment\n"
-        "Normal text.\n"
-        "%% Another comment\n"
-        "More text.\n"
-    )
-    expected = (
-        "# Title\n"
-        "Normal text.\n"
-        "More text.\n"
-    )
+    markdown = """# Title
+%% This is a comment
+Normal text.
+%% Another comment
+More text.
+"""
+    expected = """# Title
+Normal text.
+More text.
+"""
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
 def test_remove_all_types_of_comments():
     """Test if the function correctly removes all types of comments from a Markdown document."""
-    markdown = (
-        "# Title\n"
-        "<!-- HTML comment -->\n"
-        "Normal text.\n"
-        "%% Single line comment\n"
-        "<!--\n"
-        "Multi-line\n"
-        "HTML comment\n"
-        "-->\n"
-        "More text.\n"
-        "Final text.\n"
-    )
-    expected = (
-        "# Title\n"
-        "Normal text.\n"
-        "More text.\n"
-        "Final text.\n"
-    )
+    markdown = """# Title
+<!-- HTML comment -->
+Normal text.
+%% Single line comment
+<!--
+Multi-line
+HTML comment
+-->
+More text.
+Final text.
+"""
+    expected = """# Title
+Normal text.
+More text.
+Final text.
+"""
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
 def test_no_comments():
     """Test if the function correctly handles a Markdown document with no comments."""
-    markdown = (
-        "# Title\n"
-        "This is a normal Markdown\n"
-        "document with no comments.\n"
-    )
+    markdown = """# Title
+This is a normal Markdown
+document with no comments.
+"""
     assert multi_strip(rm_comments(markdown)) == multi_strip(markdown)
