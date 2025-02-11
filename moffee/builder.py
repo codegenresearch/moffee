@@ -1,11 +1,12 @@
-from typing import List
+from typing import List, Tuple
 import os
 from jinja2 import Environment, FileSystemLoader
 from moffee.compositor import Page, PageOption, composite, parse_frontmatter
 from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
-
+from moffee.utils.validation import validate_aspect_ratio
+from moffee.utils.dynamic_size import compute_slide_size
 
 def read_options(document_path) -> PageOption:
     """Read frontmatter options from the document path"""
@@ -13,7 +14,6 @@ def read_options(document_path) -> PageOption:
         document = f.read()
     _, options = parse_frontmatter(document)
     return options
-
 
 def retrieve_structure(pages: List[Page]) -> dict:
     current_h1 = None
@@ -54,8 +54,7 @@ def retrieve_structure(pages: List[Page]) -> dict:
 
     return {"page_meta": page_meta, "headings": headings}
 
-
-def render_jinja2(document: str, template_dir) -> str:
+def render_jinja2(document: str, template_dir, options: PageOption) -> str:
     """Run jinja2 templating to create html"""
     # Setup Jinja 2
     env = Environment(loader=FileSystemLoader(template_dir))
@@ -68,14 +67,16 @@ def render_jinja2(document: str, template_dir) -> str:
     pages = composite(document)
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
-    _, options = parse_frontmatter(document)
-    width, height = options.computed_slide_size
+
+    # Compute slide size dynamically
+    slide_width, slide_height = compute_slide_size(options)
+
+    # Validate aspect ratio
+    validate_aspect_ratio(slide_width, slide_height)
 
     data = {
         "title": title,
         "struct": slide_struct,
-        "slide_width": width,
-        "slide_height": height,
         "slides": [
             {
                 "h1": page.h1,
@@ -84,13 +85,14 @@ def render_jinja2(document: str, template_dir) -> str:
                 "chunk": page.chunk,
                 "layout": page.option.layout,
                 "styles": page.option.styles,
+                "slide_width": slide_width,
+                "slide_height": slide_height,
             }
             for page in pages
         ],
     }
 
     return template.render(data)
-
 
 def build(
     document_path: str, output_dir: str, template_dir: str, theme_dir: str = None
@@ -102,7 +104,7 @@ def build(
 
     merge_directories(template_dir, output_dir, theme_dir)
     options = read_options(document_path)
-    output_html = render_jinja2(document, output_dir)
+    output_html = render_jinja2(document, output_dir, options)
     output_html = redirect_paths(
         output_html, document_path=document_path, resource_dir=options.resource_dir
     )
