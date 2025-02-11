@@ -11,25 +11,25 @@ from moffee.utils.md_helper import (
 )
 
 
-def test_is_comment() -> None:
+def test_is_comment():
     assert is_comment("<!-- This is a comment -->") is True
     assert is_comment("This is not a comment") is False
 
 
-def test_is_empty() -> None:
+def test_is_empty():
     assert is_empty("<!-- This is a comment -->") is True
     assert is_empty("This is not a comment") is False
     assert is_empty(" \n") is True
 
 
-def test_get_header_level() -> None:
+def test_get_header_level():
     assert get_header_level("# Header 1") == 1
     assert get_header_level("### Header 3") == 3
     assert get_header_level("Normal text") == 0
     assert get_header_level("####### Not a valid header") == 0
 
 
-def test_is_divider() -> None:
+def test_is_divider():
     assert is_divider("---") is True
     assert is_divider("***") is True
     assert is_divider("___") is True
@@ -48,7 +48,7 @@ def test_is_divider() -> None:
     assert is_divider("<->", type="=") is False
 
 
-def test_contains_image() -> None:
+def test_contains_image():
     assert contains_image("![Alt text](image.jpg)") is True
     assert contains_image("This is an image: ![Alt text](image.jpg)") is True
     assert contains_image("This is not an image") is False
@@ -56,7 +56,7 @@ def test_contains_image() -> None:
     assert contains_image("![]()") is True  # empty alt text and URL
 
 
-def test_contains_deco() -> None:
+def test_contains_deco():
     assert contains_deco("@(layout=split, background=blue)") is True
     assert contains_deco("  @(layout=default)  ") is True
     assert contains_deco("This is not a deco") is False
@@ -64,7 +64,7 @@ def test_contains_deco() -> None:
     assert contains_deco("@()") is True  # empty deco
 
 
-def test_extract_title() -> None:
+def test_extract_title():
     assert extract_title("# Main Title\nSome content") == "Main Title"
     assert extract_title("## Secondary Title\nSome content") == "Secondary Title"
     assert (
@@ -81,12 +81,12 @@ def test_extract_title() -> None:
     assert extract_title(multi_para) == "Actual Title"
 
 
-def multi_strip(text: str) -> str:
+def multi_strip(text):
     return "\n".join([t.strip() for t in text.split("\n") if t.strip() != ""])
 
 
-def test_remove_html_comments() -> None:
-    markdown: str = """
+def test_remove_html_comments():
+    markdown = """
     # Title
     <!-- This is a comment -->
     Normal text.
@@ -96,7 +96,7 @@ def test_remove_html_comments() -> None:
     -->
     More text.
     """
-    expected: str = """
+    expected = """
     # Title
     Normal text.
     More text.
@@ -104,15 +104,15 @@ def test_remove_html_comments() -> None:
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
-def test_remove_single_line_comments() -> None:
-    markdown: str = """
+def test_remove_single_line_comments():
+    markdown = """
     # Title
     %% This is a comment
     Normal text.
     %% Another comment
     More text.
     """
-    expected: str = """
+    expected = """
     # Title
     Normal text.
     More text.
@@ -120,8 +120,8 @@ def test_remove_single_line_comments() -> None:
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
-def test_remove_all_types_of_comments() -> None:
-    markdown: str = """
+def test_remove_all_types_of_comments():
+    markdown = """
     # Title
     <!-- HTML comment -->
     Normal text.
@@ -133,7 +133,7 @@ def test_remove_all_types_of_comments() -> None:
     More text.
     Final text.
     """
-    expected: str = """
+    expected = """
     # Title
     Normal text.
     More text.
@@ -142,8 +142,8 @@ def test_remove_all_types_of_comments() -> None:
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
-def test_no_comments() -> None:
-    markdown: str = """
+def test_no_comments():
+    markdown = """
     # Title
     This is a normal Markdown
     document with no comments.
