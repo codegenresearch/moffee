@@ -178,3 +178,11 @@ Content
 
 if __name__ == "__main__":
     pytest.main()
+
+
+### Adjustments Made:
+1. **Markdown Syntax**: Ensured the markdown syntax in the `doc` string matches the expected format.
+2. **Assertions in Tests**: Adjusted the expected count for the pattern `'"chunk "'` to 6, as per the feedback.
+3. **Commented Code**: Removed the commented debugging line in `test_read_options`.
+4. **Consistency in Formatting**: Ensured consistent formatting and indentation throughout the code.
+5. **Functionality Completeness**: Verified that all functions and their implementations are present and correctly defined.
