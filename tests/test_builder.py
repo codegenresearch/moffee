@@ -2,16 +2,17 @@ import os
 import tempfile
 import pytest
 import re
+from typing import Optional, Tuple
 from moffee.builder import build, render_jinja2, read_options, retrieve_structure
 from moffee.compositor import composite
 
 
-def template_dir(name="base"):
+def template_dir(name: Optional[str] = "base") -> str:
     return os.path.join(os.path.dirname(__file__), "..", "moffee", "templates", name)
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_test_env():
+def setup_test_env() -> Tuple[str, str, str, str]:
     doc = """
 ---
 resource_dir: "resources"
@@ -22,13 +23,17 @@ background-color: 'red'
 # Test page
 Other Pages
 ![Image-1](image.png)
----
+<->
+
 Paragraph 1
-===
+<->
+
 Paragraph 2
 <->
+
 Paragraph 3
 <->
+
 ![Image-2](image2.png)
     """
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -51,11 +56,11 @@ Paragraph 3
         yield temp_dir, doc_path, res_dir, output_dir
 
 
-def appeared(text, pattern):
+def appeared(text: str, pattern: str) -> int:
     return len(re.findall(pattern, text))
 
 
-def test_rendering(setup_test_env):
+def test_rendering(setup_test_env: Tuple[str, str, str, str]) -> None:
     _, doc_path, _, _ = setup_test_env
     with open(doc_path, encoding="utf8") as f:
         doc = f.read()
@@ -66,10 +71,8 @@ def test_rendering(setup_test_env):
     assert appeared(html, "chunk-vertical") == 1
 
 
-def test_read_options(setup_test_env):
+def test_read_options(setup_test_env: Tuple[str, str, str, str]) -> None:
     _, doc_path, _, _ = setup_test_env
-    # import ipdb; ipdb.set_trace(context=15)
-
     options = read_options(doc_path)
     assert options.default_h1 is True
     assert options.theme == "beam"
@@ -77,7 +80,7 @@ def test_read_options(setup_test_env):
     assert options.resource_dir == "resources"
 
 
-def test_build(setup_test_env):
+def test_build(setup_test_env: Tuple[str, str, str, str]) -> None:
     temp_dir, doc_path, res_dir, output_dir = setup_test_env
     options = read_options(doc_path)
     build(doc_path, output_dir, template_dir(), template_dir(options.theme))
@@ -99,7 +102,7 @@ def test_build(setup_test_env):
         assert len(f.readlines()) > 2
 
 
-def test_retrieve_structure():
+def test_retrieve_structure() -> None:
     doc = """
 # Title
 p0
