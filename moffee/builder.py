@@ -55,7 +55,7 @@ def retrieve_structure(pages: List[Page]) -> dict:
     return {"page_meta": page_meta, "headings": headings}
 
 
-def render_jinja2(document: str, template_dir) -> str:
+def render_jinja2(document: str, template_dir, options: PageOption) -> str:
     """Run jinja2 templating to create html"""
     # Setup Jinja 2
     env = Environment(loader=FileSystemLoader(template_dir))
@@ -69,6 +69,9 @@ def render_jinja2(document: str, template_dir) -> str:
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
 
+    slide_width = options.styles.get("width", "1024px")
+    slide_height = options.styles.get("height", "768px")
+
     data = {
         "title": title,
         "struct": slide_struct,
@@ -80,10 +83,11 @@ def render_jinja2(document: str, template_dir) -> str:
                 "chunk": page.chunk,
                 "layout": page.option.layout,
                 "styles": page.option.styles,
-                "dimensions": {"width": "1024px", "height": "768px"}  # Default slide dimensions
             }
             for page in pages
         ],
+        "slide_width": slide_width,
+        "slide_height": slide_height,
     }
 
     return template.render(data)
@@ -99,7 +103,7 @@ def build(
 
     merge_directories(template_dir, output_dir, theme_dir)
     options = read_options(document_path)
-    output_html = render_jinja2(document, output_dir)
+    output_html = render_jinja2(document, output_dir, options)
     output_html = redirect_paths(
         output_html, document_path=document_path, resource_dir=options.resource_dir
     )
