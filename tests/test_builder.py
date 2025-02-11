@@ -24,10 +24,13 @@ Other Pages
 ![Image-1](image.png)
 ---
 Paragraph 1
+
 <!-- Divider -->
 Paragraph 2
+
 <!-- Divider -->
 Paragraph 3
+
 <!-- Divider -->
 ![Image-2](image2.png)
     """
