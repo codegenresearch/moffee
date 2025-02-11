@@ -90,6 +90,11 @@ def test_extract_title():
     assert extract_title("## Subtitle\n\n# Title\n\nContent") == "Subtitle"
     assert extract_title("# Title\n\nContent\n\n## Subtitle") == "Title"
     assert extract_title("## Subtitle\n\nContent\n\n# Title") == "Subtitle"
+    assert extract_title("# Title\n\n## Subtitle\n\n### Subheading\n\nContent") == "Title"
+    assert extract_title("## Subtitle\n\n### Subheading\n\n# Title\n\nContent") == "Subtitle"
+    assert extract_title("### Subheading\n\n# Title\n\n## Subtitle\n\nContent") == "Subheading"
+    assert extract_title("# Title\n\n## Subtitle\n\n### Subheading\n\n#### Subsubheading\n\nContent") == "Title"
+    assert extract_title("#### Subsubheading\n\n### Subheading\n\n## Subtitle\n\n# Title\n\nContent") == "Subsubheading"
 
 
 def multi_strip(text):
