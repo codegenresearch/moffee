@@ -107,7 +107,7 @@ def multi_strip(text):
     """
     Helper function to strip and remove empty lines from a text.
     """
-    return "\n".join([t.strip() for t in text.split("\n") if t.strip()])
+    return "\n".join([t.strip() for t in text.split("\n") if t.strip() != ""])
 
 
 def test_remove_html_comments():
