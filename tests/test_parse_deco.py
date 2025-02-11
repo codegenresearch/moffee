@@ -66,55 +66,48 @@ def test_deco_with_hyphen():
     assert option.styles == {"background-color": "red"}
 
 
-def test_computed_slide_size_with_aspect_ratio_and_dimensions():
+def test_computed_slide_size():
+    # Test with both aspect_ratio and slide_dimensions
     line = "@(aspect_ratio='16:9', slide_dimensions='1920x1080')"
     option = parse_deco(line)
     assert option.computed_slide_size == (1920, 1080)
 
-
-def test_computed_slide_size_with_only_dimensions():
+    # Test with only slide_dimensions
     line = "@(slide_dimensions='1920x1080')"
     option = parse_deco(line)
     assert option.computed_slide_size == (1920, 1080)
 
-
-def test_computed_slide_size_with_aspect_ratio_and_width():
+    # Test with only aspect_ratio and slide_width
     line = "@(aspect_ratio='16:9', slide_width=1920)"
     option = parse_deco(line)
     assert option.computed_slide_size == (1920, 1080)
 
-
-def test_computed_slide_size_with_aspect_ratio_and_height():
+    # Test with only aspect_ratio and slide_height
     line = "@(aspect_ratio='16:9', slide_height=1080)"
     option = parse_deco(line)
     assert option.computed_slide_size == (1920, 1080)
 
-
-def test_computed_slide_size_with_width_and_height():
+    # Test with only slide_width and slide_height
     line = "@(slide_width=1280, slide_height=720)"
     option = parse_deco(line)
     assert option.computed_slide_size == (1280, 720)
 
-
-def test_computed_slide_size_with_no_dimensions_or_aspect_ratio():
+    # Test with no dimensions or aspect ratio
     line = "@()"
     option = parse_deco(line)
     assert option.computed_slide_size is None
 
-
-def test_computed_slide_size_with_invalid_aspect_ratio():
+    # Test with invalid aspect ratio
     line = "@(aspect_ratio='invalid')"
     with pytest.raises(ValueError, match="Invalid aspect ratio format"):
         _ = parse_deco(line)
 
-
-def test_computed_slide_size_with_invalid_slide_dimensions():
+    # Test with invalid slide dimensions
     line = "@(slide_dimensions='invalid')"
     with pytest.raises(ValueError, match="Invalid slide dimensions format"):
         _ = parse_deco(line)
 
-
-def test_computed_slide_size_with_conflicting_parameters():
+    # Test with conflicting parameters
     line = "@(aspect_ratio='16:9', slide_dimensions='1920x1080', slide_width=1280, slide_height=720)"
     with pytest.raises(ValueError, match="Conflicting parameters provided"):
         _ = parse_deco(line)
@@ -126,7 +119,7 @@ if __name__ == "__main__":
 
 ### Explanation of Changes:
 1. **Removed Incorrect Comment**: Ensured that there are no unterminated string literals or incorrectly formatted comments that could cause `SyntaxError`.
-2. **Consolidation of Tests**: Broke down the `test_computed_slide_size` function into smaller, more focused test functions, each testing a specific aspect of the computed slide size.
+2. **Consolidation of Computed Slide Size Tests**: Consolidated the `test_computed_slide_size` function to cover various scenarios, making the tests more organized and easier to read.
 3. **Error Handling Tests**: Included specific error messages for invalid aspect ratio, invalid slide dimensions, and conflicting parameters.
 4. **Consistent Formatting**: Ensured consistent formatting and spacing in the test cases.
 5. **Comments**: Added comments to explain the purpose of each test function, especially for more complex scenarios.
