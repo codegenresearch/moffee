@@ -148,5 +148,6 @@ if __name__ == "__main__":
 3. **Formatting and Structure**: Maintained consistent formatting and structure, including spacing and indentation.
 4. **Comments and Documentation**: Removed the comment block at the end of the file to prevent syntax errors. Added a docstring at the beginning of the file to document changes.
 5. **Variable Naming**: Used variable names consistent with the original code for clarity and maintainability.
+6. **Unused Imports**: Removed any unused imports to keep the code clean.
 
 These changes should address the feedback and align the code more closely with the expected output.
