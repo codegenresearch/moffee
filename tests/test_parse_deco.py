@@ -134,6 +134,26 @@ def test_aspect_ratio_with_zero_width():
         _ = parse_deco(line)
 
 
+def test_default_slide_dimensions():
+    line = "@()"
+    option = parse_deco(line)
+    assert option.width == 1024  # Default width
+    assert option.height == 768  # Default height
+    assert option.aspect_ratio == 1024 / 768
+
+
+def test_aspect_ratio_format():
+    line = "@(width=1600, height=900)"
+    option = parse_deco(line)
+    assert option.aspect_ratio == 1600 / 900
+
+
+def test_aspect_ratio_constraints():
+    line = "@(width=1600, height=900)"
+    option = parse_deco(line)
+    assert 1.0 <= option.aspect_ratio <= 2.0  # Example constraint
+
+
 if __name__ == "__main__":
     pytest.main()
 
@@ -144,5 +164,7 @@ if __name__ == "__main__":
 3. **Aspect Ratio Handling**: Included tests to ensure aspect ratios are correctly calculated and handle edge cases like zero width or height.
 4. **Consistent Test Structure**: Maintained a consistent structure for setting up `PageOption` instances and asserting expected outcomes.
 5. **Comprehensive Tests**: Included a variety of tests to cover different scenarios and ensure thorough validation of the `parse_deco` function and `PageOption` class.
+6. **Default Slide Dimensions**: Added a test to check for default slide dimensions.
+7. **Aspect Ratio Format and Constraints**: Added tests to validate aspect ratio formats and constraints.
 
 This should address the feedback and ensure that the tests are syntactically correct and aligned with the expected structure and logic.
