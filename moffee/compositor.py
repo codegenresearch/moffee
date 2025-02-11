@@ -1,6 +1,5 @@
-from typing import List
-from dataclasses import dataclass, field, fields
 from typing import List, Optional, Tuple, Dict, Any
+from dataclasses import dataclass, field, fields
 from copy import deepcopy
 import yaml
 import re
@@ -28,7 +27,7 @@ class PageOption:
     slide_height: int = DEFAULT_SLIDE_HEIGHT
     layout: str = "content"
     resource_dir: str = "."
-    styles: dict = field(default_factory=dict)
+    styles: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
@@ -39,7 +38,7 @@ class PageOption:
         assert isinstance(
             self.aspect_ratio, str
         ), f"Aspect ratio must be a string, got {self.aspect_ratio}"
-        matches = re.match("([0-9]+):([0-9]+)", self.aspect_ratio)
+        matches = re.match(r"([0-9]+):([0-9]+)", self.aspect_ratio)
         if matches is None:
             raise ValueError(f"Incorrect aspect ratio format: {self.aspect_ratio}")
         ar = int(matches.group(2)) / int(matches.group(1))
@@ -48,7 +47,7 @@ class PageOption:
 
         if changed_ar and changed_h and changed_w:
             raise ValueError(
-                f"Aspect ratio, width and height cannot be changed at the same time!"
+                "Aspect ratio, width, and height cannot be changed at the same time!"
             )
         if changed_ar and changed_h:
             width = height / ar
@@ -80,7 +79,7 @@ class Alignment:
 @dataclass
 class Chunk:
     paragraph: Optional[str] = None
-    children: Optional[List["Chunk"]] = field(default_factory=list)  # List of chunks
+    children: List["Chunk"] = field(default_factory=list)  # List of chunks
     direction: Direction = Direction.HORIZONTAL
     type: Type = Type.PARAGRAPH
     alignment: Alignment = Alignment.LEFT
@@ -114,18 +113,18 @@ class Page:
         """
         Split raw_md into chunk tree
         Chunk tree branches when in-page divider is met.
-        - adjacent "<->"s create chunk with horizontal direction
-        - adjacent "===" create chunk with vertical direction
-        "===" possesses higher priority than "<->"
+        - adjacent "***"s create chunk with horizontal direction
+        - adjacent "___" create chunk with vertical direction
+        "___" possesses higher priority than "***"
 
         :return: Root of the chunk tree
         """
 
-        def split_by_div(text, type) -> List[Chunk]:
+        def split_by_div(text: str, type: str) -> List[Chunk]:
             strs = [""]
             current_escaped = False
             for line in text.split("\n"):
-                if line.strip().startswith("```"):
+                if line.strip().startswith(""):
                     current_escaped = not current_escaped
                 if is_divider(line, type) and not current_escaped:
                     strs.append("\n")
@@ -133,12 +132,12 @@ class Page:
                     strs[-1] += line + "\n"
             return [Chunk(paragraph=s) for s in strs]
 
-        # collect "==="
-        vchunks = split_by_div(self.raw_md, "=")
-        # split by "<->" if possible
+        # collect "___"
+        vchunks = split_by_div(self.raw_md, "_")
+        # split by "***" if possible
         for i in range(len(vchunks)):
-            hchunks = split_by_div(vchunks[i].paragraph, "<")
-            if len(hchunks) > 1:  # found <->
+            hchunks = split_by_div(vchunks[i].paragraph, "*")
+            if len(hchunks) > 1:  # found ***
                 vchunks[i] = Chunk(children=hchunks, type=Type.NODE)
 
         if len(vchunks) == 1:
@@ -205,7 +204,7 @@ def parse_deco(line: str, base_option: Optional[PageOption] = None) -> PageOptio
     :return: An updated PageOption
     """
 
-    def parse_key_value_string(s: str) -> dict:
+    def parse_key_value_string(s: str) -> Dict[str, Any]:
         pattern = r'([\w-]+)\s*=\s*((?:"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'|[^,]+))'
         matches = re.findall(pattern, s)
 
@@ -240,7 +239,7 @@ def parse_deco(line: str, base_option: Optional[PageOption] = None) -> PageOptio
     return updated_option
 
 
-def parse_value(value: str):
+def parse_value(value: str) -> Any:
     """Helper function to parse string values into appropriate types"""
     if value.lower() == "true":
         return True
@@ -259,17 +258,18 @@ def composite(document: str) -> List[Page]:
 
     Splitting criteria:
     - New h1/h2/h3 header (except when following another header)
-    - "---" Divider (===, <->, +++ not count)
+    - "---" Divider (___, ***, +++ not count)
 
     :param document: Input markdown document as a string.
-    :param document_path: Optional string, will be used to redirect url in documents if given.
     :return: List of Page objects representing paginated slides
     """
     pages: List[Page] = []
-    current_page_lines = []
-    current_escaped = False  # track whether in code area
-    current_h1 = current_h2 = current_h3 = None
-    prev_header_level = 0
+    current_page_lines: List[str] = []
+    current_escaped: bool = False  # track whether in code area
+    current_h1: Optional[str] = None
+    current_h2: Optional[str] = None
+    current_h3: Optional[str] = None
+    prev_header_level: int = 0
 
     document = rm_comments(document)
     document, options = parse_frontmatter(document)
@@ -303,9 +303,9 @@ def composite(document: str) -> List[Page]:
         current_page_lines = []
         current_h1 = current_h2 = current_h3 = None
 
-    for _, line in enumerate(lines):
+    for line in lines:
         # update current env stack
-        if line.strip().startswith("```"):
+        if line.strip().startswith(""):
             current_escaped = not current_escaped
 
         header_level = get_header_level(line) if not current_escaped else 0
@@ -344,7 +344,9 @@ def composite(document: str) -> List[Page]:
     create_page()
 
     # Process each page and choose titles
-    env_h1 = env_h2 = env_h3 = None
+    env_h1: Optional[str] = None
+    env_h2: Optional[str] = None
+    env_h3: Optional[str] = None
     for page in pages:
         inherit_h1 = page.option.default_h1
         inherit_h2 = page.option.default_h2
