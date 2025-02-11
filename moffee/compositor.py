@@ -12,6 +12,13 @@ from moffee.utils.md_helper import (
 )
 
 
+# Constants for default values
+DEFAULT_WIDTH = 1024
+DEFAULT_HEIGHT = 768
+ASPECT_RATIO_MIN = 1.33
+ASPECT_RATIO_MAX = 1.78
+
+
 @dataclass
 class PageOption:
     default_h1: bool = False
@@ -23,6 +30,15 @@ class PageOption:
     styles: dict = field(default_factory=dict)
     width: Optional[int] = None
     height: Optional[int] = None
+
+    @property
+    def computed_slide_size(self) -> Tuple[int, int]:
+        width = self.width if self.width is not None else DEFAULT_WIDTH
+        height = self.height if self.height is not None else DEFAULT_HEIGHT
+        aspect_ratio = width / height
+        if aspect_ratio < ASPECT_RATIO_MIN or aspect_ratio > ASPECT_RATIO_MAX:
+            print(f"Warning: Aspect ratio {aspect_ratio} is not standard.")
+        return width, height
 
 
 class Direction:
@@ -120,7 +136,7 @@ class Page:
         Modifies raw_md in place.
 
         - Removes headings 1-3
-        - Stripes
+        - Strips
         """
 
         lines = self.raw_md.splitlines()
@@ -130,17 +146,8 @@ class Page:
     def _calculate_dimensions(self):
         """
         Calculate and set the dimensions of the page.
-        This is a placeholder for actual dimension calculation logic.
         """
-        # Placeholder logic for demonstration
-        self.width = 1024
-        self.height = 768
-
-        # Validate aspect ratio
-        if self.width and self.height:
-            aspect_ratio = self.width / self.height
-            if aspect_ratio < 1.33 or aspect_ratio > 1.78:
-                print(f"Warning: Aspect ratio {aspect_ratio} is not standard.")
+        self.width, self.height = self.option.computed_slide_size
 
 
 def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
@@ -239,7 +246,6 @@ def composite(document: str) -> List[Page]:
     - "---" Divider (___, ***, +++ not count)
 
     :param document: Input markdown document as a string.
-    :param document_path: Optional string, will be used to redirect url in documents if given.
     :return: List of Page objects representing paginated slides
     """
     pages: List[Page] = []
