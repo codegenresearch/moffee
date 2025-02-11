@@ -1,6 +1,5 @@
-from typing import List
-from dataclasses import dataclass, field, fields
 from typing import List, Optional, Tuple, Dict, Any
+from dataclasses import dataclass, field, fields
 from copy import deepcopy
 import yaml
 import re
@@ -125,7 +124,7 @@ class Page:
             strs = [""]
             current_escaped = False
             for line in text.split("\n"):
-                if line.strip().startswith("```"):
+                if line.strip().startswith(""):
                     current_escaped = not current_escaped
                 if is_divider(line, type) and not current_escaped:
                     strs.append("\n")
@@ -137,8 +136,8 @@ class Page:
         vchunks = split_by_div(self.raw_md, "=")
         # split by "<->" if possible
         for i in range(len(vchunks)):
-            hchunks = split_by_div(vchunks[i].paragraph, "<")
-            if len(hchunks) > 1:  # found <->
+            hchunks = split_by_div(vchunks[i].paragraph, "<->")
+            if len(hchunks) > 1:  # found "<->"
                 vchunks[i] = Chunk(children=hchunks, type=Type.NODE)
 
         if len(vchunks) == 1:
@@ -152,11 +151,12 @@ class Page:
         Modifies raw_md in place.
 
         - Removes headings 1-3
-        - Stripes
+        - Strips empty lines
         """
 
         lines = self.raw_md.splitlines()
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
+        lines = [l for l in lines if not is_empty(l)]
         self.raw_md = "\n".join(lines).strip()
 
 
@@ -259,7 +259,7 @@ def composite(document: str) -> List[Page]:
 
     Splitting criteria:
     - New h1/h2/h3 header (except when following another header)
-    - "---" Divider (===, <->, +++ not count)
+    - "<->" Divider (===, ***, +++ not count)
 
     :param document: Input markdown document as a string.
     :param document_path: Optional string, will be used to redirect url in documents if given.
@@ -305,7 +305,7 @@ def composite(document: str) -> List[Page]:
 
     for _, line in enumerate(lines):
         # update current env stack
-        if line.strip().startswith("```"):
+        if line.strip().startswith(""):
             current_escaped = not current_escaped
 
         header_level = get_header_level(line) if not current_escaped else 0
@@ -320,7 +320,7 @@ def composite(document: str) -> List[Page]:
             # Check if the next line is also a header
             create_page()
 
-        if is_divider(line, type="-") and not current_escaped:
+        if is_divider(line, type="<->") and not current_escaped:
             create_page()
             continue
 
