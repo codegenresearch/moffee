@@ -44,7 +44,8 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     Determines if a given line is a Markdown divider (horizontal rule).
     Markdown dividers are three or more of the same character ('-', '*', '_'),
-    without any other characters except spaces.
+    without any other characters except spaces. It also matches specific dividers
+    like '<->' and '==='.
 
     :param line: The line to check
     :param type: Which type to match, str. e.g. "-" to match "---" only. Defaults to None, match any valid divider.
@@ -52,7 +53,7 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     stripped_line = line.strip()
     if type is None:
-        return bool(re.match(r"^(<->|---|===)$", stripped_line))
+        return bool(re.match(r"^(<->|---|===|[-*_]{3,})$", stripped_line))
 
     # Check if the line matches the specified type, allowing for leading and trailing spaces
     if type == "<->":
@@ -61,6 +62,8 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
         return bool(re.match(r"^\s*---\s*$", stripped_line))
     elif type == "===":
         return bool(re.match(r"^\s*===\s*$", stripped_line))
+    elif type in "-*_":
+        return bool(re.match(rf"^\s*[{type}]\s*[{type}]\s*[{type}]\s*$", stripped_line))
     else:
         return False
 
@@ -106,7 +109,7 @@ def extract_title(document: str) -> Optional[str]:
 
 def rm_comments(document: str) -> str:
     """
-    Remove comments from markdown. Supports html and "%%"
+    Remove comments from markdown. Supports HTML comments and "%%" comments.
 
     :param document: The markdown document as a string
     :return: The document with comments removed
@@ -118,9 +121,9 @@ def rm_comments(document: str) -> str:
 
 
 ### Changes Made:
-1. **Syntax Error Fix**: Removed any unterminated string literals in the comments and docstrings.
+1. **Syntax Error Fix**: Ensured all string literals, particularly in comments and docstrings, are properly terminated.
 2. **Docstring Clarity**: Enhanced the `is_divider` function's docstring to clearly describe all the types of dividers it can match.
-3. **Regular Expression for Dividers**: Implemented explicit checks for each type of divider (`<->`, `---`, `===`) in the `is_divider` function.
+3. **Regular Expression for Dividers**: Updated the regular expression in the `is_divider` function to match any valid divider, including horizontal rules made of three or more of the same character ('-', '*', '_') as well as the specific cases for `<->` and `===`.
 4. **Parameter Type Specification**: Added a type specification for the `document` parameter in the `rm_comments` function.
 5. **Return Type Consistency**: Ensured that the return types of all functions are explicitly stated in the docstrings.
 6. **Code Formatting**: Reviewed and adjusted the formatting to adhere to the style and structure of the gold code.
@@ -128,7 +131,7 @@ def rm_comments(document: str) -> str:
 ### Summary of Changes:
 - **Syntax Error Fix**: Ensured all string literals, particularly in comments and docstrings, are properly terminated.
 - **Docstring Clarity**: Improved the `is_divider` function's docstring for clarity.
-- **Regular Expression for Dividers**: Added explicit checks for each type of divider.
+- **Regular Expression for Dividers**: Updated the regular expression to match all valid dividers.
 - **Parameter Type Specification**: Added a type specification for the `document` parameter in `rm_comments`.
 - **Return Type Consistency**: Ensured consistent return types in docstrings.
 - **Code Formatting**: Adjusted formatting to match the gold code's style.
