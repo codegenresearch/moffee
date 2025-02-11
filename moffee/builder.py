@@ -1,19 +1,34 @@
-from typing import List
+from typing import List, Tuple
 import os
 from jinja2 import Environment, FileSystemLoader
 from moffee.compositor import Page, PageOption, composite, parse_frontmatter
 from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
+import re
 
+# Default slide dimensions
+DEFAULT_SLIDE_WIDTH = 1920
+DEFAULT_SLIDE_HEIGHT = 1080
+
+def validate_aspect_ratio(width: int, height: int) -> bool:
+    """Validate the aspect ratio of the slide dimensions."""
+    aspect_ratio = width / height
+    return 1.77 <= aspect_ratio <= 1.78  # 16:9 aspect ratio
 
 def read_options(document_path) -> PageOption:
-    """Read frontmatter options from the document path"""
+    """Read frontmatter options from the document path and validate slide dimensions."""
     with open(document_path, "r") as f:
         document = f.read()
     _, options = parse_frontmatter(document)
+    
+    # Validate slide dimensions
+    width = options.styles.get('width', DEFAULT_SLIDE_WIDTH)
+    height = options.styles.get('height', DEFAULT_SLIDE_HEIGHT)
+    if not validate_aspect_ratio(width, height):
+        raise ValueError("Slide dimensions do not match the 16:9 aspect ratio.")
+    
     return options
-
 
 def retrieve_structure(pages: List[Page]) -> dict:
     current_h1 = None
@@ -54,7 +69,6 @@ def retrieve_structure(pages: List[Page]) -> dict:
 
     return {"page_meta": page_meta, "headings": headings}
 
-
 def render_jinja2(document: str, template_dir) -> str:
     """Run jinja2 templating to create html"""
     # Setup Jinja 2
@@ -68,14 +82,10 @@ def render_jinja2(document: str, template_dir) -> str:
     pages = composite(document)
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
-    _, options = parse_frontmatter(document)
-    width, height = options.computed_slide_size
 
     data = {
         "title": title,
         "struct": slide_struct,
-        "slide_width": width,
-        "slide_height": height,
         "slides": [
             {
                 "h1": page.h1,
@@ -90,7 +100,6 @@ def render_jinja2(document: str, template_dir) -> str:
     }
 
     return template.render(data)
-
 
 def build(
     document_path: str, output_dir: str, template_dir: str, theme_dir: str = None
