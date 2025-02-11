@@ -12,6 +12,13 @@ from moffee.utils.md_helper import (
 )
 
 
+# Constants for default values
+DEFAULT_SLIDE_WIDTH = 1024
+DEFAULT_SLIDE_HEIGHT = 768
+MIN_ASPECT_RATIO = 1.33
+MAX_ASPECT_RATIO = 1.78
+
+
 @dataclass
 class PageOption:
     default_h1: bool = False
@@ -21,8 +28,27 @@ class PageOption:
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
-    slide_width: int = 1024  # Default slide width
-    slide_height: int = 768  # Default slide height
+    slide_width: int = DEFAULT_SLIDE_WIDTH
+    slide_height: int = DEFAULT_SLIDE_HEIGHT
+
+    @property
+    def computed_slide_size(self) -> Tuple[int, int]:
+        """Calculate and return the computed slide dimensions."""
+        return self.slide_width, self.slide_height
+
+    @property
+    def aspect_ratio(self) -> float:
+        """Calculate and return the aspect ratio of the slide."""
+        return self.slide_width / self.slide_height
+
+    def validate_aspect_ratio(self):
+        """Validate the aspect ratio of the slide dimensions."""
+        aspect_ratio = self.aspect_ratio
+        if not (MIN_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO):
+            raise ValueError(
+                f"Unsupported aspect ratio: {aspect_ratio}. "
+                f"Please use an aspect ratio between 16:9 ({MAX_ASPECT_RATIO}) and 4:3 ({MIN_ASPECT_RATIO})."
+            )
 
 
 class Direction:
@@ -61,14 +87,15 @@ class Page:
 
     def __post_init__(self):
         self._preprocess()
-        self._validate_aspect_ratio()
 
     @property
     def title(self) -> Optional[str]:
+        """Return the title of the page, which is the first non-empty header."""
         return self.h1 or self.h2 or self.h3
 
     @property
     def subtitle(self) -> Optional[str]:
+        """Return the subtitle of the page, which is the second non-empty header."""
         if self.h1:
             return self.h2 or self.h3
         elif self.h2:
@@ -78,7 +105,7 @@ class Page:
     @property
     def chunk(self) -> Chunk:
         """
-        Split raw_md into chunk tree
+        Split raw_md into chunk tree.
         Chunk tree branches when in-page divider is met.
         - adjacent "***"s create chunk with horizontal direction
         - adjacent "___" create chunk with vertical direction
@@ -120,23 +147,9 @@ class Page:
         - Removes headings 1-3
         - Strips
         """
-
         lines = self.raw_md.splitlines()
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
         self.raw_md = "\n".join(lines).strip()
-
-    def _validate_aspect_ratio(self):
-        """
-        Validates the aspect ratio of the slide dimensions.
-        Raises a ValueError if the aspect ratio is not supported.
-        """
-        width = self.option.slide_width
-        height = self.option.slide_height
-        aspect_ratio = width / height
-
-        if aspect_ratio < 1.33 or aspect_ratio > 1.78:
-            raise ValueError(f"Unsupported aspect ratio: {aspect_ratio}. "
-                             f"Please use an aspect ratio between 16:9 (1.78) and 4:3 (1.33).")
 
 
 def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
@@ -170,6 +183,9 @@ def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
         if name in yaml_data:
             setattr(option, name, yaml_data.pop(name))
     option.styles = yaml_data
+
+    # Validate aspect ratio
+    option.validate_aspect_ratio()
 
     return content, option
 
