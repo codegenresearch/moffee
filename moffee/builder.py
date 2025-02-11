@@ -115,7 +115,7 @@ def build(
         f.write(output_html)
 
 
-### Key Changes:
+# Key Changes:
 # 1. **Function Parameters**: Ensured that `render_jinja2` function parameters are consistent with the gold code.
 # 2. **Options Handling**: Retrieved options directly from the frontmatter within the `render_jinja2` function.
 # 3. **Data Structure**: Included `slide_width` and `slide_height` in the `data` dictionary at the correct level.
