@@ -25,14 +25,13 @@ def get_header_level(line: str) -> int:
     match = re.match(r"^(#{1,6})\s", line)
     if match:
         return len(match.group(1))
-    else:
-        return 0
+    return 0
 
 
 def is_empty(line: str) -> bool:
     """
     Determines if a given line is an empty line in markdown.
-    A line is empty if it is blank or comment only
+    A line is empty if it is blank or a comment.
 
     :param line: The line to check
     :return: True if the line is empty, False otherwise
@@ -43,11 +42,11 @@ def is_empty(line: str) -> bool:
 def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     Determines if a given line is a Markdown divider (horizontal rule).
-    Markdown dividers are three or more hyphens, asterisks, or underscores,
+    Markdown dividers are three or more hyphens, asterisks, underscores, or equal signs,
     without any other characters except spaces.
 
     :param line: The line to check
-    :param type: Which type to match, str. e.g. "*" to match "***" only. Defaults to None, match any of "*", "-" and "_".
+    :param type: Which type to match, str. e.g. "*" to match "***" only. Defaults to None, match any of "*", "-", "_", or "=".
     :return: True if the line is a divider, False otherwise
     """
     stripped_line = line.strip()
@@ -55,17 +54,19 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
         return False
 
     if type is None:
-        return bool(re.match(r"^[-*_]{3,}$", stripped_line))
+        return bool(re.match(r"^\s*[-*_={3,}\s*$", stripped_line))
     elif type == "-":
-        return bool(re.match(r"^-{3,}$", stripped_line))
+        return bool(re.match(r"^\s*-{3,}\s*$", stripped_line))
     elif type == "*":
-        return bool(re.match(r"^\*{3,}$", stripped_line))
+        return bool(re.match(r"^\s*\*{3,}\s*$", stripped_line))
     elif type == "_":
-        return bool(re.match(r"^_{3,}$", stripped_line))
+        return bool(re.match(r"^\s*_{3,}\s*$", stripped_line))
+    elif type == "=":
+        return bool(re.match(r"^\s*={3,}\s*$", stripped_line))
     elif type == "<":
         return stripped_line == "<->"
     else:
-        raise ValueError("type must be one of '*', '-', '_', or '<'")
+        return False
 
 
 def contains_image(line: str) -> bool:
@@ -101,11 +102,10 @@ def extract_title(document: str) -> Optional[str]:
     match = re.search(heading_pattern, document, re.MULTILINE)
     if match:
         return match.group(2).strip()
-    else:
-        return None
+    return None
 
 
-def rm_comments(document: str) -> str:
+def rm_comments(document):
     """
     Remove HTML and single-line comments from the markdown document.
 
