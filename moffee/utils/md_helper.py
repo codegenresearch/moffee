@@ -25,7 +25,8 @@ def get_header_level(line: str) -> int:
     match = re.match(r"^(#{1,6})\s", line)
     if match:
         return len(match.group(1))
-    return 0
+    else:
+        return 0
 
 
 def is_empty(line: str) -> bool:
@@ -54,7 +55,7 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
         return False
 
     if type is None:
-        return bool(re.match(r"^\s*[-*_={3,}\s*$", stripped_line))
+        return bool(re.match(r"^\s*[-*_={3,}]\s*$", stripped_line))
     elif type == "-":
         return bool(re.match(r"^\s*-{3,}\s*$", stripped_line))
     elif type == "*":
@@ -102,12 +103,14 @@ def extract_title(document: str) -> Optional[str]:
     match = re.search(heading_pattern, document, re.MULTILINE)
     if match:
         return match.group(2).strip()
-    return None
+    else:
+        return None
 
 
 def rm_comments(document):
     """
     Remove HTML and single-line comments from the markdown document.
+    Supports comments in the format <!-- comment --> and %% comment
 
     :param document: The markdown document
     :return: The document with comments removed
