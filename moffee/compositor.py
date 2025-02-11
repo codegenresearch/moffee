@@ -55,7 +55,7 @@ class PageOption:
         if not (MIN_ASPECT_RATIO <= aspect_ratio_value <= MAX_ASPECT_RATIO):
             raise ValueError(
                 f"Unsupported aspect ratio: {aspect_ratio_value}. "
-                f"Please use an aspect ratio between 16:9 ({MAX_ASPECT_RATIO}) and 4:3 ({MIN_ASPECT_RATIO})."
+                f"Please use an aspect ratio between 4:3 ({MIN_ASPECT_RATIO}) and 16:9 ({MAX_ASPECT_RATIO})."
             )
 
 
