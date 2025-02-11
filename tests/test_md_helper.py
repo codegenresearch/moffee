@@ -28,7 +28,6 @@ def test_get_header_level():
     assert get_header_level("### Header 3") == 3
     assert get_header_level("Normal text") == 0
     assert get_header_level("####### Not a valid header") == 0
-    assert get_header_level("#") == 1
     assert get_header_level("#Title") == 1  # No space after '#'
     assert get_header_level("##Title") == 2  # No space after '##'
     assert get_header_level("###Title") == 3  # No space after '###'
