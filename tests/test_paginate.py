@@ -118,13 +118,13 @@ Content 3
 Content 4
     """
     pages = composite(doc)
-    assert len(pages) == 4
+    assert len(pages) == 4, "Expected 4 pages, got {}".format(len(pages))
 
 
 def test_escaped_area_paging():
     doc = """
 Content 1
-
+bash
 ---
 Content 2
 
@@ -132,7 +132,7 @@ Content 2
 Content 3
     """
     pages = composite(doc)
-    assert len(pages) == 1
+    assert len(pages) == 1, "Expected 1 page, got {}".format(len(pages))
 
 
 def test_escaped_area_chunking():
@@ -140,14 +140,14 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-
+bash
 ***
 Content 3
 
     """
     pages = composite(doc)
-    assert len(pages) == 2
-    assert len(pages[1].chunk.children) == 0
+    assert len(pages) == 2, "Expected 2 pages, got {}".format(len(pages))
+    assert len(pages[1].chunk.children) == 0, "Expected 0 children, got {}".format(len(pages[1].chunk.children))
 
 
 def test_title_and_subtitle():
@@ -160,10 +160,10 @@ def test_title_and_subtitle():
 Content
     """
     pages = composite(doc)
-    assert len(pages) == 2
-    assert pages[0].title == "Title"
-    assert pages[0].subtitle == "Subtitle"
-    assert pages[1].title == "Title2"
+    assert len(pages) == 2, "Expected 2 pages, got {}".format(len(pages))
+    assert pages[0].title == "Title", "Expected 'Title', got {}".format(pages[0].title)
+    assert pages[0].subtitle == "Subtitle", "Expected 'Subtitle', got {}".format(pages[0].subtitle)
+    assert pages[1].title == "Title2", "Expected 'Title2', got {}".format(pages[1].title)
 
 
 def test_adjacent_headings_same_level():
@@ -175,9 +175,9 @@ def test_adjacent_headings_same_level():
 ### Heading2
 """
     pages = composite(doc)
-    assert len(pages) == 3
-    assert pages[1].title == "Subtitle2"
-    assert pages[1].subtitle == "Heading"
+    assert len(pages) == 3, "Expected 3 pages, got {}".format(len(pages))
+    assert pages[1].title == "Subtitle2", "Expected 'Subtitle2', got {}".format(pages[1].title)
+    assert pages[1].subtitle == "Heading", "Expected 'Heading', got {}".format(pages[1].subtitle)
 
 
 def test_chunking_trivial():
@@ -192,9 +192,9 @@ Paragraph 4
     """
     pages = composite(doc)
     chunk = pages[0].chunk
-    assert chunk.type == Type.PARAGRAPH
-    assert len(chunk.children) == 0
-    assert chunk.paragraph.strip() == doc.strip()
+    assert chunk.type == Type.PARAGRAPH, "Expected Type.PARAGRAPH, got {}".format(chunk.type)
+    assert len(chunk.children) == 0, "Expected 0 children, got {}".format(len(chunk.children))
+    assert chunk.paragraph.strip() == doc.strip(), "Expected paragraph to match doc, got {}".format(chunk.paragraph.strip())
 
 
 def test_chunking_vertical():
@@ -206,10 +206,10 @@ Paragraph 2
     """
     pages = composite(doc)
     chunk = pages[0].chunk
-    assert chunk.type == Type.NODE
-    assert len(chunk.children) == 2
-    assert chunk.direction == Direction.VERTICAL
-    assert chunk.children[0].type == Type.PARAGRAPH
+    assert chunk.type == Type.NODE, "Expected Type.NODE, got {}".format(chunk.type)
+    assert len(chunk.children) == 2, "Expected 2 children, got {}".format(len(chunk.children))
+    assert chunk.direction == Direction.VERTICAL, "Expected Direction.VERTICAL, got {}".format(chunk.direction)
+    assert chunk.children[0].type == Type.PARAGRAPH, "Expected Type.PARAGRAPH, got {}".format(chunk.children[0].type)
 
 
 def test_chunking_horizontal():
@@ -222,10 +222,10 @@ Paragraph 2
     """
     pages = composite(doc)
     chunk = pages[0].chunk
-    assert chunk.type == Type.NODE
-    assert len(chunk.children) == 3
-    assert chunk.direction == Direction.HORIZONTAL
-    assert chunk.children[0].type == Type.PARAGRAPH
+    assert chunk.type == Type.NODE, "Expected Type.NODE, got {}".format(chunk.type)
+    assert len(chunk.children) == 3, "Expected 3 children, got {}".format(len(chunk.children))
+    assert chunk.direction == Direction.HORIZONTAL, "Expected Direction.HORIZONTAL, got {}".format(chunk.direction)
+    assert chunk.children[0].type == Type.PARAGRAPH, "Expected Type.PARAGRAPH, got {}".format(chunk.children[0].type)
 
 
 def test_chunking_hybrid():
@@ -241,17 +241,17 @@ Paragraph 3
 Paragraph 4
     """
     pages = composite(doc)
-    assert len(pages) == 2
+    assert len(pages) == 2, "Expected 2 pages, got {}".format(len(pages))
     chunk = pages[1].chunk
-    assert chunk.type == Type.NODE
-    assert len(chunk.children) == 2
-    assert chunk.direction == Direction.VERTICAL
-    assert len(chunk.children[0].children) == 0
-    assert chunk.children[0].type == Type.PARAGRAPH
-    assert chunk.children[0].paragraph.strip() == "Paragraph 1"
+    assert chunk.type == Type.NODE, "Expected Type.NODE, got {}".format(chunk.type)
+    assert len(chunk.children) == 2, "Expected 2 children, got {}".format(len(chunk.children))
+    assert chunk.direction == Direction.VERTICAL, "Expected Direction.VERTICAL, got {}".format(chunk.direction)
+    assert len(chunk.children[0].children) == 0, "Expected 0 children, got {}".format(len(chunk.children[0].children))
+    assert chunk.children[0].type == Type.PARAGRAPH, "Expected Type.PARAGRAPH, got {}".format(chunk.children[0].type)
+    assert chunk.children[0].paragraph.strip() == "Paragraph 1", "Expected 'Paragraph 1', got {}".format(chunk.children[0].paragraph.strip())
     next_chunk = chunk.children[1]
-    assert next_chunk.direction == Direction.HORIZONTAL
-    assert len(next_chunk.children) == 3
+    assert next_chunk.direction == Direction.HORIZONTAL, "Expected Direction.HORIZONTAL, got {}".format(next_chunk.direction)
+    assert len(next_chunk.children) == 3, "Expected 3 children, got {}".format(len(next_chunk.children))
 
 
 def test_empty_lines_handling():
@@ -261,8 +261,8 @@ def test_empty_lines_handling():
 Content with empty line above
     """
     pages = composite(doc)
-    assert len(pages[0].chunk.children) == 0
-    assert pages[0].option.styles == {}
+    assert len(pages[0].chunk.children) == 0, "Expected 0 children, got {}".format(len(pages[0].chunk.children))
+    assert pages[0].option.styles == {}, "Expected empty styles, got {}".format(pages[0].option.styles)
 
 
 def test_deco_handling():
@@ -276,9 +276,9 @@ Hello
 @(background=blue)
 """
     pages = composite(doc)
-    assert pages[0].raw_md == "Hello"
-    assert pages[0].option.default_h1 is False
-    assert pages[0].option.styles == {"background": "blue"}
+    assert pages[0].raw_md == "Hello", "Expected 'Hello', got {}".format(pages[0].raw_md)
+    assert pages[0].option.default_h1 is False, "Expected False, got {}".format(pages[0].option.default_h1)
+    assert pages[0].option.styles == {"background": "blue"}, "Expected {'background': 'blue'}, got {}".format(pages[0].option.styles)
 
 
 def test_multiple_deco():
@@ -294,13 +294,13 @@ default_h1: true
 Hello
 """
     pages = composite(doc)
-    assert len(pages) == 2
-    assert pages[0].raw_md == ""
-    assert pages[0].title == "Title1"
-    assert pages[0].subtitle == "Title2"
-    assert pages[0].option.styles == {"background": "blue"}
-    assert pages[0].option.default_h1 is True
-    assert pages[1].option.default_h1 is False
+    assert len(pages) == 2, "Expected 2 pages, got {}".format(len(pages))
+    assert pages[0].raw_md == "", "Expected '', got {}".format(pages[0].raw_md)
+    assert pages[0].title == "Title1", "Expected 'Title1', got {}".format(pages[0].title)
+    assert pages[0].subtitle == "Title2", "Expected 'Title2', got {}".format(pages[0].subtitle)
+    assert pages[0].option.styles == {"background": "blue"}, "Expected {'background': 'blue'}, got {}".format(pages[0].option.styles)
+    assert pages[0].option.default_h1 is True, "Expected True, got {}".format(pages[0].option.default_h1)
+    assert pages[1].option.default_h1 is False, "Expected False, got {}".format(pages[1].option.default_h1)
 
 
 if __name__ == "__main__":
