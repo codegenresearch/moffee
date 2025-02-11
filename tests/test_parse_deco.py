@@ -7,16 +7,12 @@ def test_basic_deco():
     option = parse_deco(line)
     assert option.layout == "split"
     assert option.styles == {"background": "blue"}
-    assert option.aspect_ratio is None
-    assert option.slide_dimensions is None
 
 
 def test_empty_deco():
     line = "@()"
     option = parse_deco(line)
     assert option == PageOption()
-    assert option.aspect_ratio is None
-    assert option.slide_dimensions is None
 
 
 def test_invalid_deco():
@@ -37,8 +33,6 @@ def test_deco_with_base_option():
     assert updated_option.default_h1 is True
     assert updated_option.default_h2 is True
     assert updated_option.default_h3 is True
-    assert updated_option.aspect_ratio is None
-    assert updated_option.slide_dimensions is None
 
 
 def test_deco_with_type_conversion():
@@ -50,8 +44,6 @@ def test_deco_with_type_conversion():
     assert updated_option.default_h1 is True
     assert updated_option.default_h2 is False
     assert updated_option.layout == "centered"
-    assert updated_option.aspect_ratio is None
-    assert updated_option.slide_dimensions is None
 
 
 def test_deco_with_spaces():
@@ -59,8 +51,6 @@ def test_deco_with_spaces():
     option = parse_deco(line)
     assert option.layout == "split"
     assert option.styles == {"background": "blue"}
-    assert option.aspect_ratio is None
-    assert option.slide_dimensions is None
 
 
 def test_deco_with_quotes():
@@ -68,16 +58,31 @@ def test_deco_with_quotes():
     option = parse_deco(line)
     assert option.layout == "split"
     assert option.styles == {"length": "34px"}
-    assert option.aspect_ratio is None
-    assert option.slide_dimensions is None
 
 
 def test_deco_with_hyphen():
     line = "@(background-color='red')"
     option = parse_deco(line)
     assert option.styles == {"background-color": "red"}
-    assert option.aspect_ratio is None
-    assert option.slide_dimensions is None
+
+
+def test_deco_with_aspect_ratio():
+    line = "@(aspect_ratio='16:9')"
+    option = parse_deco(line)
+    assert option.aspect_ratio == "16:9"
+
+
+def test_deco_with_slide_dimensions():
+    line = "@(slide_dimensions='1920x1080')"
+    option = parse_deco(line)
+    assert option.slide_dimensions == "1920x1080"
+
+
+def test_deco_with_aspect_ratio_and_slide_dimensions():
+    line = "@(aspect_ratio='16:9', slide_dimensions='1920x1080')"
+    option = parse_deco(line)
+    assert option.aspect_ratio == "16:9"
+    assert option.slide_dimensions == "1920x1080"
 
 
 if __name__ == "__main__":
