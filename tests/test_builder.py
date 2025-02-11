@@ -26,13 +26,16 @@ Other Pages
 ---
 Paragraph 1
 
-<!-- Divider -->
+---
+
 Paragraph 2
 
-<!-- Divider -->
+---
+
 Paragraph 3
 
-<!-- Divider -->
+---
+
 ![Image-2](image2.png)
 """
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -72,6 +75,7 @@ def test_rendering(setup_test_env):
 
 def test_read_options(setup_test_env):
     _, doc_path, _, _ = setup_test_env
+    # import ipdb; ipdb.set_trace(context=15)
     options = read_options(doc_path)
     assert options.default_h1 is True
     assert options.theme == "beam"
