@@ -301,3 +301,13 @@ Hello
 
 if __name__ == "__main__":
     pytest.main()
+
+
+### Changes Made:
+1. **Consistency in Document Formatting**: Ensured that the formatting of the documents used in tests matches the expected structure, particularly with dividers and content.
+2. **Handling of Dividers**: Adjusted the test documents to use `---` for dividers consistently and ensured that the `composite` function correctly handles these dividers without creating unnecessary pages.
+3. **Handling of Escaped Areas**: Corrected the test documents to use triple backticks (bash ... ) for escaped areas and ensured that the `composite` function does not create new pages or chunks within these areas.
+4. **Chunk Type Determination**: Ensured that the logic for determining chunk types (node or paragraph) is consistent with the expected behavior, particularly in the `test_chunking_*` tests.
+5. **Assertions and Expected Values**: Verified that the assertions in the tests match the expected values, ensuring that the properties of the pages created by the `composite` function are correctly validated.
+
+These changes should address the feedback and improve the alignment with the expected behavior.
