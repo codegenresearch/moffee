@@ -1,6 +1,5 @@
-from typing import List
-from dataclasses import dataclass, field, fields
 from typing import List, Optional, Tuple, Dict, Any
+from dataclasses import dataclass, field, fields
 from copy import deepcopy
 import yaml
 import re
@@ -12,10 +11,6 @@ from moffee.utils.md_helper import (
     contains_deco,
 )
 
-DEFAULT_ASPECT_RATIO = "16:9"
-DEFAULT_SLIDE_WIDTH = 720
-DEFAULT_SLIDE_HEIGHT = 405
-
 
 @dataclass
 class PageOption:
@@ -23,41 +18,11 @@ class PageOption:
     default_h2: bool = True
     default_h3: bool = True
     theme: str = "default"
-    aspect_ratio: str = DEFAULT_ASPECT_RATIO
-    slide_width: int = DEFAULT_SLIDE_WIDTH
-    slide_height: int = DEFAULT_SLIDE_HEIGHT
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
-
-    @property
-    def computed_slide_size(self) -> Tuple[int, int]:
-        changed_ar = self.aspect_ratio != DEFAULT_ASPECT_RATIO
-        changed_w = self.slide_width != DEFAULT_SLIDE_WIDTH
-        changed_h = self.slide_height != DEFAULT_SLIDE_HEIGHT
-
-        assert isinstance(
-            self.aspect_ratio, str
-        ), f"Aspect ratio must be a string, got {self.aspect_ratio}"
-        matches = re.match("([0-9]+):([0-9]+)", self.aspect_ratio)
-        if matches is None:
-            raise ValueError(f"Incorrect aspect ratio format: {self.aspect_ratio}")
-        ar = int(matches.group(2)) / int(matches.group(1))
-        width = self.slide_width
-        height = self.slide_height
-
-        if changed_ar and changed_h and changed_w:
-            raise ValueError(
-                f"Aspect ratio, width and height cannot be changed at the same time!"
-            )
-        if changed_ar and changed_h:
-            width = height / ar
-        elif changed_ar and changed_w:
-            height = width * ar
-        elif changed_ar:
-            height = width * ar
-
-        return width, height
+    slide_width: Optional[int] = None
+    slide_height: Optional[int] = None
 
 
 class Direction:
@@ -125,7 +90,7 @@ class Page:
             strs = [""]
             current_escaped = False
             for line in text.split("\n"):
-                if line.strip().startswith("```"):
+                if line.strip().startswith(""):
                     current_escaped = not current_escaped
                 if is_divider(line, type) and not current_escaped:
                     strs.append("\n")
@@ -152,7 +117,7 @@ class Page:
         Modifies raw_md in place.
 
         - Removes headings 1-3
-        - Stripes
+        - Strips
         """
 
         lines = self.raw_md.splitlines()
@@ -256,7 +221,6 @@ def composite(document: str) -> List[Page]:
     - "---" Divider (___, ***, +++ not count)
 
     :param document: Input markdown document as a string.
-    :param document_path: Optional string, will be used to redirect url in documents if given.
     :return: List of Page objects representing paginated slides
     """
     pages: List[Page] = []
@@ -299,7 +263,7 @@ def composite(document: str) -> List[Page]:
 
     for _, line in enumerate(lines):
         # update current env stack
-        if line.strip().startswith("```"):
+        if line.strip().startswith(""):
             current_escaped = not current_escaped
 
         header_level = get_header_level(line) if not current_escaped else 0
@@ -362,3 +326,52 @@ def composite(document: str) -> List[Page]:
             page.h3 = env_h3
 
     return pages
+
+
+def test_parse_frontmatter_with_slide_dimensions():
+    doc = """
+---
+slide_width: 1024
+slide_height: 768
+---
+# Title
+Content
+"""
+    content, option = parse_frontmatter(doc)
+    assert option.slide_width == 1024
+    assert option.slide_height == 768
+
+
+def test_parse_deco_with_slide_dimensions():
+    doc = """
+# Title
+@(slide_width=800, slide_height=600)
+Content
+"""
+    lines = doc.split("\n")
+    option = PageOption()
+    for line in lines:
+        if contains_deco(line):
+            option = parse_deco(line, option)
+    assert option.slide_width == 800
+    assert option.slide_height == 600
+
+
+def test_composite_with_slide_dimensions():
+    doc = """
+---
+slide_width: 1280
+slide_height: 1024
+---
+# Title
+@(slide_width=1024, slide_height=768)
+Content
+---
+## Subtitle
+More content
+"""
+    pages = composite(doc)
+    assert pages[0].option.slide_width == 1024
+    assert pages[0].option.slide_height == 768
+    assert pages[1].option.slide_width == 1280
+    assert pages[1].option.slide_height == 1024
