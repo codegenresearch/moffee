@@ -370,7 +370,7 @@ def composite(document: str) -> List[Page]:
 
 
 ### Key Changes Made:
-1. **Removed the SyntaxError**: Removed the line causing the `SyntaxError` by ensuring all comments are properly prefixed with `#`.
+1. **Removed the SyntaxError**: Ensured all lines are properly formatted as comments by prefixing them with `#`.
 2. **Consistency in Commenting**: Ensured that comments are consistent in style and detail, matching the tone and clarity of the gold code.
 3. **Escape Sequence Handling**: Used the specific marker for code blocks (`), as seen in the gold code.
 4. **Chunk Splitting Logic**: Ensured the logic for splitting the raw markdown into chunks is consistent with the gold code, particularly regarding how dividers are handled.
