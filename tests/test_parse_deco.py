@@ -139,8 +139,10 @@ if __name__ == "__main__":
 
 
 ### Key Changes:
-1. **Removed Extraneous Text**: Ensured there are no extraneous comments or text that could cause syntax errors.
-2. **Error Handling**: Added specific error messages for invalid width and height values, including cases where width or height is zero.
-3. **Aspect Ratio Handling**: Added tests to ensure aspect ratios are correctly calculated and handle edge cases like zero width or height.
+1. **Removed Extraneous Text**: Removed any extraneous text or comments that were not properly formatted as comments.
+2. **Error Handling**: Ensured that specific error messages are used for invalid width and height values, including cases where width or height is zero.
+3. **Aspect Ratio Handling**: Included tests to ensure aspect ratios are correctly calculated and handle edge cases like zero width or height.
 4. **Consistent Test Structure**: Maintained a consistent structure for setting up `PageOption` instances and asserting expected outcomes.
 5. **Comprehensive Tests**: Included a variety of tests to cover different scenarios and ensure thorough validation of the `parse_deco` function and `PageOption` class.
+
+This should address the feedback and ensure that the tests are syntactically correct and aligned with the expected structure and logic.
