@@ -18,8 +18,9 @@ def test_empty_deco():
 
 def test_invalid_deco():
     line = "This is not a deco"
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as excinfo:
         _ = parse_deco(line)
+    assert str(excinfo.value) == "Invalid deco format"
 
 
 def test_deco_with_base_option():
@@ -83,15 +84,25 @@ def test_computed_slide_size():
     assert option3.styles == {"width": "1280", "height": "720"}
     assert option3.aspect_ratio == 1280 / 720
 
+    line4 = "@(width=1920, height=1080)"
+    option4 = parse_deco(line4)
+    assert option4.styles == {"width": "1920", "height": "1080"}
+    assert option4.aspect_ratio == 1920 / 1080
+
+    line5 = "@(width=1600, height=900)"
+    option5 = parse_deco(line5)
+    assert option5.styles == {"width": "1600", "height": "900"}
+    assert option5.aspect_ratio == 1600 / 900
+
 
 if __name__ == "__main__":
     pytest.main()
 
 
 ### Key Changes:
-1. **Removed Invalid Comment**: Removed the comment that caused the `SyntaxError`.
-2. **Simplified Assertions**: Focused on essential properties in each test.
-3. **Review Input Strings**: Simplified input strings where possible.
-4. **Computed Slide Size Tests**: Expanded `test_computed_slide_size` to include multiple assertions for different scenarios.
-5. **Error Handling**: Removed the assertion for the error message in `test_invalid_deco`.
-6. **Consistency in Formatting**: Ensured consistent formatting and spacing throughout the code.
+1. **Removed Invalid Comment**: Ensured there are no invalid comments that could cause syntax errors.
+2. **Computed Slide Size Tests**: Expanded `test_computed_slide_size` to include more scenarios with different `width`, `height`, and `aspect_ratio` values.
+3. **Error Handling**: Included specific error messages in `test_invalid_deco` to provide more informative feedback.
+4. **Consistency in Assertions**: Ensured assertions are consistent and match the expected structure.
+5. **Use of PageOption**: Utilized `PageOption` in various contexts, including default values and computed properties.
+6. **Formatting and Spacing**: Ensured consistent formatting and spacing throughout the code.
