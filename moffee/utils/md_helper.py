@@ -54,8 +54,13 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
     if type is None:
         return bool(re.match(r"^(<->|---|===|\*\*\*|___)$", stripped_line))
 
-    assert type in ["<->", "---", "===", "***", "___"], "type must be one of '<->', '---', '===', '***', or '___'"
-    return bool(re.match(rf"^{re.escape(type)}+$", stripped_line))
+    # Ensure type is one of the valid divider types
+    valid_types = ["<->", "---", "===", "***", "___"]
+    if type not in valid_types:
+        raise ValueError(f"type must be one of {valid_types}")
+
+    # Check if the line matches the specified type
+    return bool(re.match(rf"^\s*{re.escape(type)}\s*$", stripped_line))
 
 
 def contains_image(line: str) -> bool:
@@ -100,6 +105,9 @@ def extract_title(document: str) -> Optional[str]:
 def rm_comments(document: str) -> str:
     """
     Remove comments from markdown. Supports html and "%%"
+
+    :param document: The markdown document as a string
+    :return: The document with comments removed
     """
     document = re.sub(r"<!--[\s\S]*?-->", "", document)
     document = re.sub(r"^\s*%%.*$", "", document, flags=re.MULTILINE)
