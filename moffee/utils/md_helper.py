@@ -40,21 +40,21 @@ def is_empty(line: str) -> bool:
     return is_comment(line) or line.strip() == ""
 
 
-def is_divider(line: str, type=None) -> bool:
+def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     Determines if a given line is a Markdown divider (horizontal rule).
     Markdown dividers are three or more '<->' for horizontal or '===' for vertical,
     without any other characters except spaces.
 
     :param line: The line to check
-    :param type: Which type to match, str. e.g. "<->" to match "<->" only or "===" for vertical. Defaults to None, match any of "<->" and "===".
+    :param type: Which type to match, str. e.g. "<->" to match "<->" only or "===" for vertical. Defaults to None, match any of "<->", "---", and "===".
     :return: True if the line is a divider, False otherwise
     """
     stripped_line = line.strip()
     if type is None:
-        return stripped_line == "<->" or stripped_line == "==="
+        return bool(re.match(r"^(<->|---|===)$", stripped_line))
 
-    assert type in ["<->", "==="], "type must be either '<->' or '==='"
+    assert type in ["<->", "---", "==="], "type must be either '<->', '---', or '==='"
     return stripped_line == type
 
 
@@ -97,7 +97,7 @@ def extract_title(document: str) -> Optional[str]:
         return None
 
 
-def rm_comments(document):
+def rm_comments(document: str) -> str:
     """
     Remove comments from markdown. Supports html and "%%"
     """
