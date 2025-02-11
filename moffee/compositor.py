@@ -113,9 +113,9 @@ class Page:
         """
         Split raw_md into chunk tree
         Chunk tree branches when in-page divider is met.
-        - adjacent "***"s create chunk with horizontal direction
-        - adjacent "___" create chunk with vertical direction
-        "___" possesses higher priority than "***"
+        - "<->" creates chunk with horizontal direction
+        - "===" creates chunk with vertical direction
+        "===" possesses higher priority than "<->"
 
         :return: Root of the chunk tree
         """
@@ -132,12 +132,12 @@ class Page:
                     strs[-1] += line + "\n"
             return [Chunk(paragraph=s.strip()) for s in strs if s.strip()]
 
-        # collect "___"
-        vchunks = split_by_div(self.raw_md, "_")
-        # split by "***" if possible
+        # collect "==="
+        vchunks = split_by_div(self.raw_md, "=")
+        # split by "<->" if possible
         for i in range(len(vchunks)):
-            hchunks = split_by_div(vchunks[i].paragraph, "*")
-            if len(hchunks) > 1:  # found ***
+            hchunks = split_by_div(vchunks[i].paragraph, "-")
+            if len(hchunks) > 1:  # found "<->"
                 vchunks[i] = Chunk(children=hchunks, type=Type.NODE)
 
         if len(vchunks) == 1:
@@ -258,7 +258,7 @@ def composite(document: str) -> List[Page]:
 
     Splitting criteria:
     - New h1/h2/h3 header (except when following another header)
-    - "---" Divider (___, ***, +++ not count)
+    - "<->" Divider (===, *** not count)
 
     :param document: Input markdown document as a string.
     :return: List of Page objects representing paginated slides
@@ -278,7 +278,7 @@ def composite(document: str) -> List[Page]:
         nonlocal current_page_lines, current_h1, current_h2, current_h3, options
         # Only make new page if has non empty lines
 
-        if all(l.strip() == "" for l in current_page_lines):
+        if all(is_empty(l) for l in current_page_lines):
             return
 
         raw_md = ""
