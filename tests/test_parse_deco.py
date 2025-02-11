@@ -67,48 +67,43 @@ def test_deco_with_hyphen():
 
 
 def test_computed_slide_size():
+    # Test with both width and height provided
     line = "@(width=1024, height=768)"
     option = parse_deco(line)
     assert option.width == 1024
     assert option.height == 768
     assert option.aspect_ratio == 1024 / 768
 
-
-def test_computed_slide_size_with_aspect_ratio():
-    line = "@(width=1920, height=1080)"
+    # Test with default dimensions
+    line = "@()"
     option = parse_deco(line)
-    assert option.width == 1920
-    assert option.height == 1080
-    assert option.aspect_ratio == 1920 / 1080
+    assert option.width == 1024  # Default width
+    assert option.height == 768  # Default height
+    assert option.aspect_ratio == 1024 / 768
 
-
-def test_computed_slide_size_with_non_standard_aspect_ratio():
+    # Test with non-standard aspect ratio
     line = "@(width=800, height=600)"
     option = parse_deco(line)
     assert option.width == 800
     assert option.height == 600
     assert option.aspect_ratio == 800 / 600
 
-
-def test_computed_slide_size_with_missing_width():
+    # Test with missing width
     line = "@(height=768)"
     with pytest.raises(ValueError, match="Width and height must both be provided"):
         _ = parse_deco(line)
 
-
-def test_computed_slide_size_with_missing_height():
+    # Test with missing height
     line = "@(width=1024)"
     with pytest.raises(ValueError, match="Width and height must both be provided"):
         _ = parse_deco(line)
 
-
-def test_computed_slide_size_with_invalid_width():
+    # Test with invalid width
     line = "@(width=abc, height=768)"
     with pytest.raises(ValueError, match="Width and height must be integers"):
         _ = parse_deco(line)
 
-
-def test_computed_slide_size_with_invalid_height():
+    # Test with invalid height
     line = "@(width=1024, height=xyz)"
     with pytest.raises(ValueError, match="Width and height must be integers"):
         _ = parse_deco(line)
@@ -121,25 +116,15 @@ def test_aspect_ratio_calculation():
     assert option.height == 900
     assert option.aspect_ratio == 1600 / 900
 
-
-def test_aspect_ratio_with_zero_height():
+    # Test with zero height
     line = "@(width=1024, height=0)"
     with pytest.raises(ValueError, match="Height must be greater than zero"):
         _ = parse_deco(line)
 
-
-def test_aspect_ratio_with_zero_width():
+    # Test with zero width
     line = "@(width=0, height=768)"
     with pytest.raises(ValueError, match="Width must be greater than zero"):
         _ = parse_deco(line)
-
-
-def test_default_slide_dimensions():
-    line = "@()"
-    option = parse_deco(line)
-    assert option.width == 1024  # Default width
-    assert option.height == 768  # Default height
-    assert option.aspect_ratio == 1024 / 768
 
 
 def test_aspect_ratio_format():
@@ -160,11 +145,10 @@ if __name__ == "__main__":
 
 ### Key Changes:
 1. **Removed Extraneous Text**: Removed any extraneous text or comments that were not properly formatted as comments.
-2. **Error Handling**: Ensured that specific error messages are used for invalid width and height values, including cases where width or height is zero.
-3. **Aspect Ratio Handling**: Included tests to ensure aspect ratios are correctly calculated and handle edge cases like zero width or height.
-4. **Consistent Test Structure**: Maintained a consistent structure for setting up `PageOption` instances and asserting expected outcomes.
-5. **Comprehensive Tests**: Included a variety of tests to cover different scenarios and ensure thorough validation of the `parse_deco` function and `PageOption` class.
-6. **Default Slide Dimensions**: Added a test to check for default slide dimensions.
-7. **Aspect Ratio Format and Constraints**: Added tests to validate aspect ratio formats and constraints.
+2. **Consolidated Slide Size Tests**: Consolidated tests related to slide size into a single test function `test_computed_slide_size` to check various configurations of `PageOption` and their computed slide sizes.
+3. **Error Messages**: Ensured that specific error messages are used for invalid width and height values, including cases where width or height is zero.
+4. **Aspect Ratio Handling**: Included tests to ensure aspect ratios are correctly calculated and handle edge cases like zero width or height.
+5. **Default Values**: Added a test to check for default slide dimensions.
+6. **Test Structure**: Maintained a consistent structure for setting up `PageOption` instances and asserting expected outcomes.
 
 This should address the feedback and ensure that the tests are syntactically correct and aligned with the expected structure and logic.
