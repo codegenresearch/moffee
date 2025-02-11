@@ -40,23 +40,23 @@ def is_empty(line: str) -> bool:
     return is_comment(line) or line.strip() == ""
 
 
-def is_divider(line: str, type=None) -> bool:
+def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     Determines if a given line is a Markdown divider (horizontal rule).
-    Markdown dividers are three or more hyphens, asterisks, or underscores,
+    Markdown dividers are three or more hyphens, asterisks, underscores, or equals,
     without any other characters except spaces.
 
     :param line: The line to check
-    :param type: Which type to match, str. e.g. "*" to match "***" only. Defaults to "", match any of "*", "-" and "_".
+    :param type: Which type to match, str. e.g. "*" to match "***" only. Defaults to None, match any of "*", "-", "_", "=", or "<".
     :return: True if the line is a divider, False otherwise
     """
     stripped_line = line.strip()
     if len(stripped_line) < 3:
         return False
     if type is None:
-        type = "-*_"
+        type = "-*_=<"
 
-    assert type in "-*_", "type must be either '*', '-' or '_'"
+    assert type in "-*_=<", "type must be one of '*', '-', '_', '=', or '<'"
     return all(char in type for char in stripped_line) and any(
         char * 3 in stripped_line for char in type
     )
@@ -104,6 +104,9 @@ def extract_title(document: str) -> Optional[str]:
 def rm_comments(document: str) -> str:
     """
     Remove comments from markdown. Supports html and "%%"
+
+    :param document: The document in markdown
+    :return: The document with comments removed
     """
     document = re.sub(r"<!--[\s\S]*?-->", "", document)
     document = re.sub(r"^\s*%%.*$", "", document, flags=re.MULTILINE)
