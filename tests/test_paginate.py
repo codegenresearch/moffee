@@ -122,7 +122,7 @@ Content 3
 def test_escaped_area_paging():
     doc = """
 Content 1
-bash
+
 ---
 Content 2
 
@@ -138,7 +138,7 @@ def test_escaped_area_chunking():
 Content 1
 ---
 Content 2
-bash
+
 ---
 Content 3
 
@@ -306,7 +306,7 @@ if __name__ == "__main__":
 ### Changes Made:
 1. **Removed the Misplaced Comment**: The comment at the end of the file was causing a `SyntaxError`. It has been removed to ensure the file is syntactically correct.
 2. **Consistency in Document Formatting**: Ensured that the formatting of the documents used in tests matches the expected structure, particularly with dividers and content.
-3. **Handling of Escaped Areas**: Corrected the test documents to use triple backticks (bash ... ) for escaped areas and ensured that the `composite` function does not create new pages or chunks within these areas.
+3. **Handling of Escaped Areas**: Corrected the test documents to use triple backticks ( ... ) for escaped areas and ensured that the `composite` function does not create new pages or chunks within these areas.
 4. **Assertions and Expected Values**: Verified that the assertions in the tests match the expected values, ensuring that the properties of the pages created by the `composite` function are correctly validated.
 5. **Chunk Type Determination**: Ensured that the logic for determining chunk types (node or paragraph) is consistent with the expected behavior, particularly in the `test_chunking_*` tests.
 6. **Use of Decorators**: Reviewed how decorators are handled in the tests to ensure they align with the expected behavior.
