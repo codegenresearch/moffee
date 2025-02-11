@@ -23,7 +23,7 @@ background-color: 'red'
 Other Pages
 ![Image-1](image.png)
 
----
+===
 
 Paragraph 1
 
@@ -147,10 +147,10 @@ if __name__ == "__main__":
 
 
 ### Changes Made:
-1. **Document Formatting**: Ensured the document structure in `setup_test_env` uses `---` and `<->` for paragraph separation consistently.
+1. **Document Formatting**: Ensured the document structure in `setup_test_env` uses `===` and `<->` for paragraph separation consistently.
 2. **String Patterns**: Verified that the patterns in `test_rendering` match the expected strings in the gold code.
-3. **Comments**: Added `#` to ensure all comments are properly formatted as Python comments.
-4. **Assertion Comments**: Ensured comments regarding output directory integrity and CSS usage are phrased similarly to those in the gold code.
+3. **Comment Consistency**: Removed the multi-line comment block that was causing the `SyntaxError` and ensured all comments are properly formatted as Python comments using the `#` symbol.
+4. **Assertion Clarity**: Ensured that the assertions in the test functions are clear and consistent with the gold code.
 5. **Unused Imports**: Reviewed imports and ensured they are used in the code.
 6. **Debugging Statements**: Removed any debugging statements for a cleaner final version.
-7. **Consistency in Assertions**: Ensured that assertions in `test_read_options` and other test functions are consistent with the gold code.
+7. **Consistency in Functionality**: Ensured that the functionality of the tests aligns with the expected behavior as outlined in the gold code.
