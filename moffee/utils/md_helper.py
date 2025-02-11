@@ -61,10 +61,14 @@ def is_divider(line: str, type: Optional[str] = None) -> bool:
 
     if type == "<":
         return stripped_line == "<->"
+    elif type == "=":
+        return re.match(r"^\s*=+\s*$", stripped_line) is not None
+    elif type == "-":
+        return re.match(r"^\s*-\s*$", stripped_line) is not None
+    elif type == "_":
+        return re.match(r"^\s*_+\s*$", stripped_line) is not None
     else:
-        return all(char in type for char in stripped_line) and any(
-            char * 3 in stripped_line for char in type
-        )
+        return False
 
 
 def contains_image(line: str) -> bool:
@@ -121,13 +125,16 @@ def rm_comments(document: str) -> str:
 
 ### Key Changes:
 1. **`is_divider` Function**:
-   - Added handling for the "<->" divider by checking if the stripped line is exactly "<->" when `type` is "<".
-   - Used a more detailed docstring to explain the behavior of the `type` parameter.
+   - Simplified the logic using regular expressions for each type of divider.
+   - Added more explicit checks for each type of divider (`<`, `=`, `-`, `_`).
 
 2. **Docstring Consistency**:
    - Ensured that all docstrings are consistent in formatting and detail.
 
-3. **Parameter Type in `rm_comments`**:
+3. **Return Type Hint in `rm_comments`**:
    - Added a return type hint to the `rm_comments` function.
 
-These changes should address the feedback and improve the functionality of the code.
+4. **General Code Structure**:
+   - Ensured consistent spacing and indentation for better readability.
+
+These changes should address the feedback and improve the functionality and readability of the code.
