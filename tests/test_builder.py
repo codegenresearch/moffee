@@ -22,6 +22,7 @@ background-color: 'red'
 # Test page
 Other Pages
 ![Image-1](image.png)
+
 ---
 Paragraph 1
 
@@ -33,7 +34,7 @@ Paragraph 3
 
 <!-- Divider -->
 ![Image-2](image2.png)
-    """
+"""
     with tempfile.TemporaryDirectory() as temp_dir:
         # Setup test files and directories
         doc_path = os.path.join(temp_dir, "test.md")
