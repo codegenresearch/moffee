@@ -107,7 +107,7 @@ def extract_title(document: str) -> Optional[str]:
         return None
 
 
-def rm_comments(document):
+def rm_comments(document: str) -> str:
     """
     Remove HTML and single-line comments from the markdown document.
     Supports comments in the format <!-- comment --> and %% comment
@@ -118,3 +118,11 @@ def rm_comments(document):
     document = re.sub(r"<!--[\s\S]*?-->", "", document)
     document = re.sub(r"^\s*%%.*$", "", document, flags=re.MULTILINE)
     return document.strip()
+
+
+### Adjustments Made:
+1. **`is_divider` Function**: Updated the regex pattern to correctly match lines with three or more hyphens, asterisks, underscores, or equal signs without requiring spaces on either side.
+2. **Documentation Consistency**: Ensured that the descriptions in the docstrings are consistent and clear.
+3. **Extract Title Function**: Made the docstring more concise and focused.
+4. **Comment Removal Function**: Expanded the docstring to explain the types of comments being removed.
+5. **Code Formatting**: Ensured consistent spacing and line breaks for improved readability.
