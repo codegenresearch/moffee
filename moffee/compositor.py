@@ -13,8 +13,9 @@ from moffee.utils.md_helper import (
 
 
 # Constants for default values
-DEFAULT_SLIDE_WIDTH = 1024
-DEFAULT_SLIDE_HEIGHT = 768
+DEFAULT_SLIDE_WIDTH = 1280
+DEFAULT_SLIDE_HEIGHT = 720
+DEFAULT_ASPECT_RATIO = "16:9"
 MIN_ASPECT_RATIO = 1.33
 MAX_ASPECT_RATIO = 1.78
 
@@ -30,23 +31,39 @@ class PageOption:
     styles: dict = field(default_factory=dict)
     slide_width: int = DEFAULT_SLIDE_WIDTH
     slide_height: int = DEFAULT_SLIDE_HEIGHT
+    aspect_ratio: str = DEFAULT_ASPECT_RATIO
 
     @property
     def computed_slide_size(self) -> Tuple[int, int]:
-        """Calculate and return the computed slide dimensions."""
-        return self.slide_width, self.slide_height
+        """Calculate and return the computed slide dimensions based on aspect ratio."""
+        aspect_ratio = self._parse_aspect_ratio(self.aspect_ratio)
+        if aspect_ratio is None:
+            raise ValueError(f"Invalid aspect ratio: {self.aspect_ratio}. "
+                             f"Please use a format like '16:9'.")
+        width, height = aspect_ratio
+        return width, height
 
-    @property
-    def aspect_ratio(self) -> float:
-        """Calculate and return the aspect ratio of the slide."""
-        return self.slide_width / self.slide_height
+    def _parse_aspect_ratio(self, aspect_ratio_str: str) -> Optional[Tuple[int, int]]:
+        """Parse the aspect ratio string and return the width and height as integers."""
+        try:
+            width, height = map(int, aspect_ratio_str.split(':'))
+            if width <= 0 or height <= 0:
+                return None
+            return width, height
+        except (ValueError, TypeError):
+            return None
 
     def validate_aspect_ratio(self):
         """Validate the aspect ratio of the slide dimensions."""
-        aspect_ratio = self.aspect_ratio
-        if not (MIN_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO):
+        aspect_ratio = self._parse_aspect_ratio(self.aspect_ratio)
+        if aspect_ratio is None:
+            raise ValueError(f"Unsupported aspect ratio: {self.aspect_ratio}. "
+                             f"Please use a format like '16:9'.")
+        width, height = aspect_ratio
+        aspect_ratio_value = width / height
+        if not (MIN_ASPECT_RATIO <= aspect_ratio_value <= MAX_ASPECT_RATIO):
             raise ValueError(
-                f"Unsupported aspect ratio: {aspect_ratio}. "
+                f"Unsupported aspect ratio: {aspect_ratio_value}. "
                 f"Please use an aspect ratio between 16:9 ({MAX_ASPECT_RATIO}) and 4:3 ({MIN_ASPECT_RATIO})."
             )
 
@@ -124,7 +141,7 @@ class Page:
                     strs.append("\n")
                 else:
                     strs[-1] += line + "\n"
-            return [Chunk(paragraph=s) for s in strs]
+            return [Chunk(paragraph=s.strip()) for s in strs if s.strip()]
 
         # collect "___"
         vchunks = split_by_div(self.raw_md, "_")
@@ -182,7 +199,7 @@ def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
         name = field.name
         if name in yaml_data:
             setattr(option, name, yaml_data.pop(name))
-    option.styles = yaml_data
+    option.styles.update(yaml_data)  # Ensure remaining styles are added
 
     # Validate aspect ratio
     option.validate_aspect_ratio()
