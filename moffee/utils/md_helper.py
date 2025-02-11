@@ -43,19 +43,19 @@ def is_empty(line: str) -> bool:
 def is_divider(line: str, type: Optional[str] = None) -> bool:
     """
     Determines if a given line is a Markdown divider (horizontal rule).
-    Markdown dividers are three or more '<->' for horizontal or '===' for vertical,
+    Markdown dividers are three or more of the same character ('-', '*', '_'),
     without any other characters except spaces.
 
     :param line: The line to check
-    :param type: Which type to match, str. e.g. "<->" to match "<->" only or "===" for vertical. Defaults to None, match any of "<->", "---", and "===".
+    :param type: Which type to match, str. e.g. "-" to match "---" only. Defaults to None, match any valid divider.
     :return: True if the line is a divider, False otherwise
     """
     stripped_line = line.strip()
     if type is None:
-        return bool(re.match(r"^(<->|---|===)$", stripped_line))
+        return bool(re.match(r"^(<->|---|===|\*\*\*|___)$", stripped_line))
 
-    assert type in ["<->", "---", "==="], "type must be either '<->', '---', or '==='"
-    return stripped_line == type
+    assert type in ["<->", "---", "===", "***", "___"], "type must be one of '<->', '---', '===', '***', or '___'"
+    return bool(re.match(rf"^{re.escape(type)}+$", stripped_line))
 
 
 def contains_image(line: str) -> bool:
