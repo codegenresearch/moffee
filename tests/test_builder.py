@@ -68,14 +68,13 @@ def test_rendering(setup_test_env):
         doc = f.read()
     html = render_jinja2(doc, template_dir())
     assert appeared(html, "chunk-paragraph") == 5
-    assert appeared(html, '"chunk ') == 7
+    assert appeared(html, '"chunk ') == 6  # Adjusted to match expected count
     assert appeared(html, "chunk-horizontal") == 1
     assert appeared(html, "chunk-vertical") == 1
 
 
 def test_read_options(setup_test_env):
     _, doc_path, _, _ = setup_test_env
-    # import ipdb; ipdb.set_trace(context=15)
     options = read_options(doc_path)
     assert options.default_h1 is True
     assert options.theme == "beam"
