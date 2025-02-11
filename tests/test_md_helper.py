@@ -12,14 +12,14 @@ from moffee.utils.md_helper import (
 
 
 def test_is_comment():
-    assert is_comment("<!-- This is a comment -->")
-    assert not is_comment("This is not a comment")
+    assert is_comment("<!-- This is a comment -->") is True
+    assert is_comment("This is not a comment") is False
 
 
 def test_is_empty():
-    assert is_empty("<!-- This is a comment -->")
-    assert not is_empty("This is not a comment")
-    assert is_empty(" \n")
+    assert is_empty("<!-- This is a comment -->") is True
+    assert is_empty("This is not a comment") is False
+    assert is_empty(" \n") is True
 
 
 def test_get_header_level():
@@ -30,36 +30,44 @@ def test_get_header_level():
 
 
 def test_is_divider():
-    assert is_divider("---")
-    assert is_divider("***")
-    assert is_divider("___")
-    assert is_divider("  ----  ")
-    assert not is_divider("--")
-    assert not is_divider("- - -")
-    assert not is_divider("This is not a divider")
-    assert is_divider("***", type="*")
-    assert not is_divider("***", type="-")
-    assert not is_divider("* * *", type="*")
-    assert is_divider("<->")
-    assert is_divider("===", type="=")
+    assert is_divider("---") is True
+    assert is_divider("***") is True
+    assert is_divider("___") is True
+    assert is_divider("  ----  ") is True
+    assert is_divider("--") is False
+    assert is_divider("- - -") is False
+    assert is_divider("This is not a divider") is False
+    assert is_divider("***", type="*") is True
+    assert is_divider("***", type="-") is False
+    assert is_divider("* * *", type="*") is False
+    assert is_divider("<->") is True
+    assert is_divider("===", type="=") is True
+    assert is_divider("==", type="=") is False
+    assert is_divider("===", type="*") is False
+    assert is_divider("  ===  ", type="=") is True
+    assert is_divider("  ***  ", type="*") is True
+    assert is_divider("  ___  ", type="_") is True
+    assert is_divider("   ---   ") is True
+    assert is_divider("   ***   ", type="*") is True
+    assert is_divider("   ___   ", type="_") is True
 
 
 def test_contains_image():
-    assert contains_image("![Alt text](image.jpg)")
-    assert contains_image("This is an image: ![Alt text](image.jpg)")
-    assert not contains_image("This is not an image")
-    assert contains_image("![](image.jpg)")  # empty alt text
-    assert contains_image("![]()")  # empty alt text and URL
+    assert contains_image("![Alt text](image.jpg)") is True
+    assert contains_image("This is an image: ![Alt text](image.jpg)") is True
+    assert contains_image("This is not an image") is False
+    assert contains_image("![](image.jpg)") is True  # empty alt text
+    assert contains_image("![]()") is True  # empty alt text and URL
 
 
 def test_contains_deco():
-    assert contains_deco("@(layout=split, background=blue)")
-    assert contains_deco("  @(layout=default)  ")
-    assert not contains_deco("This is not a deco")
-    assert not contains_deco("@(key=value) Some text")
-    assert contains_deco("@()")
-    assert contains_deco("@(key1=value1, key2=value2)")
-    assert contains_deco("@(key1=value1, key2=value2, key3=value3)")
+    assert contains_deco("@(layout=split, background=blue)") is True
+    assert contains_deco("  @(layout=default)  ") is True
+    assert contains_deco("This is not a deco") is False
+    assert contains_deco("@(key=value) Some text") is False
+    assert contains_deco("@()") is True  # empty deco
+    assert contains_deco("@(key1=value1, key2=value2)") is True
+    assert contains_deco("@(key1=value1, key2=value2, key3=value3)") is True
 
 
 def test_extract_title():
