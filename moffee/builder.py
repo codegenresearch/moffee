@@ -6,7 +6,7 @@ from moffee.markdown import md
 from moffee.utils.md_helper import extract_title
 from moffee.utils.file_helper import redirect_paths, copy_assets, merge_directories
 
-def read_options(document_path: str) -> PageOption:
+def read_options(document_path):
     """Read frontmatter options from the document path"""
     with open(document_path, "r") as f:
         document = f.read()
@@ -52,7 +52,7 @@ def retrieve_structure(pages: List[Page]) -> dict:
 
     return {"page_meta": page_meta, "headings": headings}
 
-def render_jinja2(document: str, template_dir):
+def render_jinja2(document: str, template_dir) -> str:
     """Run jinja2 templating to create html"""
     # Setup Jinja 2
     env = Environment(loader=FileSystemLoader(template_dir))
@@ -67,8 +67,9 @@ def render_jinja2(document: str, template_dir):
     slide_struct = retrieve_structure(pages)
     options = read_options(document)
 
-    # Retrieve slide dimensions using computed_slide_size if available
-    slide_width, slide_height = options.computed_slide_size if hasattr(options, 'computed_slide_size') else (1920, 1080)
+    # Retrieve slide dimensions directly from options
+    width = options.styles.get('width', 1920)
+    height = options.styles.get('height', 1080)
 
     data = {
         "title": title,
@@ -84,8 +85,8 @@ def render_jinja2(document: str, template_dir):
             }
             for page in pages
         ],
-        "slide_width": slide_width,
-        "slide_height": slide_height,
+        "width": width,
+        "height": height,
     }
 
     return template.render(data)
@@ -112,10 +113,12 @@ def build(
 
 
 ### Key Changes:
-1. **`read_options` Function**: Modified to accept `document_path` and read the document content from that path.
-2. **`render_jinja2` Function**: 
+1. **`read_options` Function**: Removed the type hint for `document_path`.
+2. **`render_jinja2` Function**:
    - Removed the type hint for `template_dir`.
-   - Retrieved slide dimensions using `options.computed_slide_size` if available, otherwise defaulting to (1920, 1080).
+   - Added a return type hint `-> str`.
+   - Retrieved slide dimensions directly from `options.styles` using `get`.
+   - Used `width` and `height` instead of `slide_width` and `slide_height`.
 3. **Comments**: Removed the improperly formatted comment that caused the `SyntaxError`.
 
 These changes should resolve the `SyntaxError` and align the code more closely with the expected structure and functionality.
