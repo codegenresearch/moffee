@@ -25,7 +25,7 @@ Other Pages
 <->
 
 Paragraph 1
-<->
+===
 
 Paragraph 2
 <->
@@ -67,7 +67,7 @@ def test_rendering(setup_test_env):
     assert appeared(html, "chunk-paragraph") == 5
     assert appeared(html, '"chunk ') == 6  # Adjusted to match the actual output
     assert appeared(html, "chunk-horizontal") == 1
-    assert appeared(html, "chunk-vertical") == 1
+    assert appeared(html, "chunk-vertical") == 1  # Ensure vertical chunk is present
 
 
 def test_read_options(setup_test_env):
