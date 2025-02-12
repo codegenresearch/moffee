@@ -12,25 +12,7 @@ def template_dir(name="base"):
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_test_env():
-    doc = """
----
-resource_dir: "resources"
-default_h1: true
-theme: beam
-background-color: 'red'
----
-# Test page
-Other Pages
-![Image-1](image.png)
----
-Paragraph 1
-===
-Paragraph 2
-<->
-Paragraph 3
-<->
-![Image-2](image2.png)
-    """
+    doc = """\n---\nresource_dir: "resources"\ndefault_h1: true\ntheme: beam\nbackground-color: 'red'\n---\n# Test page\nOther Pages\n![Image-1](image.png)\n---\nParagraph 1\n===  # Clearer divider\nParagraph 2\n---\nParagraph 3\n---\n![Image-2](image2.png)\n@(custom_decorator=value)  # Enhanced custom decorator\n"""
     with tempfile.TemporaryDirectory() as temp_dir:
         # Setup test files and directories
         doc_path = os.path.join(temp_dir, "test.md")
@@ -100,19 +82,7 @@ def test_build(setup_test_env):
 
 
 def test_retrieve_structure():
-    doc = """
-# Title
-p0
-## Heading1
-p1
-### Subheading1
-p2
-## Heading2
-### Subheading1
-p3
-# Title2
-p4
-"""
+    doc = """\n# Title\np0\n## Heading1\np1\n### Subheading1\np2\n## Heading2\n### Subheading1\np3\n# Title2\np4\n"""
     pages = composite(doc)
     slide_struct = retrieve_structure(pages)
     headings = slide_struct["headings"]
@@ -134,6 +104,18 @@ p4
         {"h1": "Title", "h2": "Heading2", "h3": "Subheading1"},
         {"h1": "Title2", "h2": None, "h3": None},
     ]
+
+
+def test_custom_decorator_handling():
+    doc = """\n# Title\n@(custom_decorator=value)\nThis is a test with a custom decorator.\n"""
+    pages = composite(doc)
+    assert pages[0].option.custom_decorator == "value"
+
+
+def test_comment_removal():
+    doc = """\n# Title\n<!-- This is a comment -->\nThis is not a comment.\n"""
+    pages = composite(doc)
+    assert pages[0].raw_md == "This is not a comment."
 
 
 if __name__ == "__main__":
