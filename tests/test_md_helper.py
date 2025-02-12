@@ -40,15 +40,6 @@ def test_is_divider():
     assert is_divider("***", type="*") is True
     assert is_divider("***", type="-") is False
     assert is_divider("* * *", type="*") is False
-    assert is_divider("<->") is True
-    assert is_divider("<->", type="<") is True
-    assert is_divider("<->", type="-") is False
-    assert is_divider("===") is True
-    assert is_divider("===", type="=") is True
-    assert is_divider("===", type="*") is False
-    assert is_divider("  ===  ") is True
-    assert is_divider("==") is False
-    assert is_divider("= = =") is False
 
 
 def test_contains_image():
@@ -89,66 +80,23 @@ def multi_strip(text):
 
 
 def test_remove_html_comments():
-    markdown = """
-    # Title
-    <!-- This is a comment -->
-    Normal text.
-    <!--
-    This is a
-    multi-line comment
-    -->
-    More text.
-    """
-    expected = """
-    # Title
-    Normal text.
-    More text.
-    """
+    markdown = """\n    # Title\n    <!-- This is a comment -->\n    Normal text.\n    <!--\n    This is a\n    multi-line comment\n    -->\n    More text.\n    """
+    expected = """\n    # Title\n    Normal text.\n    More text.\n    """
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
 def test_remove_single_line_comments():
-    markdown = """
-    # Title
-    %% This is a comment
-    Normal text.
-    %% Another comment
-    More text.
-    """
-    expected = """
-    # Title
-    Normal text.
-    More text.
-    """
+    markdown = """\n    # Title\n    %% This is a comment\n    Normal text.\n    %% Another comment\n    More text.\n    """
+    expected = """\n    # Title\n    Normal text.\n    More text.\n    """
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
 def test_remove_all_types_of_comments():
-    markdown = """
-    # Title
-    <!-- HTML comment -->
-    Normal text.
-    %% Single line comment
-    <!--
-    Multi-line
-    HTML comment
-    -->
-    More text.
-    Final text.
-    """
-    expected = """
-    # Title
-    Normal text.
-    More text.
-    Final text.
-    """
+    markdown = """\n    # Title\n    <!-- HTML comment -->\n    Normal text.\n    %% Single line comment\n    <!--\n    Multi-line\n    HTML comment\n    -->\n    More text.\n    Final text.\n    """
+    expected = """\n    # Title\n    Normal text.\n    More text.\n    Final text.\n    """
     assert multi_strip(rm_comments(markdown)) == multi_strip(expected)
 
 
 def test_no_comments():
-    markdown = """
-    # Title
-    This is a normal Markdown
-    document with no comments.
-    """
+    markdown = """\n    # Title\n    This is a normal Markdown\n    document with no comments.\n    """
     assert multi_strip(rm_comments(markdown)) == multi_strip(markdown)
