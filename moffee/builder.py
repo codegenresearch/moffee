@@ -12,6 +12,20 @@ def read_options(document_path) -> PageOption:
     with open(document_path, "r") as f:
         document = f.read()
     _, options = parse_frontmatter(document)
+    
+    # Define default slide dimensions if not provided
+    if not options.get('slide_width') or not options.get('slide_height'):
+        options['slide_width'] = 1920  # Default width
+        options['slide_height'] = 1080  # Default height
+
+    # Validate aspect ratio format strictly
+    if not isinstance(options['slide_width'], int) or not isinstance(options['slide_height'], int):
+        raise ValueError("Slide dimensions must be integers.")
+    
+    aspect_ratio = options['slide_width'] / options['slide_height']
+    if aspect_ratio not in [16/9, 4/3]:
+        raise ValueError("Aspect ratio must be either 16:9 or 4:3.")
+
     return options
 
 
@@ -68,14 +82,17 @@ def render_jinja2(document: str, template_dir) -> str:
     pages = composite(document)
     title = extract_title(document) or "Untitled"
     slide_struct = retrieve_structure(pages)
-    _, options = parse_frontmatter(document)
-    width, height = options.computed_slide_size
+
+    # Compute slide size dynamically based on options
+    options = read_options(document)
+    slide_size = {
+        'width': options['slide_width'],
+        'height': options['slide_height']
+    }
 
     data = {
         "title": title,
         "struct": slide_struct,
-        "slide_width": width,
-        "slide_height": height,
         "slides": [
             {
                 "h1": page.h1,
@@ -83,7 +100,7 @@ def render_jinja2(document: str, template_dir) -> str:
                 "h3": page.h3,
                 "chunk": page.chunk,
                 "layout": page.option.layout,
-                "styles": page.option.styles,
+                "styles": {**page.option.styles, **slide_size},
             }
             for page in pages
         ],
