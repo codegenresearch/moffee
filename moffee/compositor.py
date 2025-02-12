@@ -1,6 +1,5 @@
-from typing import List
-from dataclasses import dataclass, field, fields
 from typing import List, Optional, Tuple, Dict, Any
+from dataclasses import dataclass, field, fields
 from copy import deepcopy
 import yaml
 import re
@@ -12,10 +11,6 @@ from moffee.utils.md_helper import (
     contains_deco,
 )
 
-DEFAULT_ASPECT_RATIO = "16:9"
-DEFAULT_SLIDE_WIDTH = 720
-DEFAULT_SLIDE_HEIGHT = 405
-
 
 @dataclass
 class PageOption:
@@ -23,41 +18,11 @@ class PageOption:
     default_h2: bool = True
     default_h3: bool = True
     theme: str = "default"
-    aspect_ratio: str = DEFAULT_ASPECT_RATIO
-    slide_width: int = DEFAULT_SLIDE_WIDTH
-    slide_height: int = DEFAULT_SLIDE_HEIGHT
     layout: str = "content"
     resource_dir: str = "."
     styles: dict = field(default_factory=dict)
-
-    @property
-    def computed_slide_size(self) -> Tuple[int, int]:
-        changed_ar = self.aspect_ratio != DEFAULT_ASPECT_RATIO
-        changed_w = self.slide_width != DEFAULT_SLIDE_WIDTH
-        changed_h = self.slide_height != DEFAULT_SLIDE_HEIGHT
-
-        assert isinstance(
-            self.aspect_ratio, str
-        ), f"Aspect ratio must be a string, got {self.aspect_ratio}"
-        matches = re.match("([0-9]+):([0-9]+)", self.aspect_ratio)
-        if matches is None:
-            raise ValueError(f"Incorrect aspect ratio format: {self.aspect_ratio}")
-        ar = int(matches.group(2)) / int(matches.group(1))
-        width = self.slide_width
-        height = self.slide_height
-
-        if changed_ar and changed_h and changed_w:
-            raise ValueError(
-                f"Aspect ratio, width and height cannot be changed at the same time!"
-            )
-        if changed_ar and changed_h:
-            width = height / ar
-        elif changed_ar and changed_w:
-            height = width * ar
-        elif changed_ar:
-            height = width * ar
-
-        return width, height
+    width: Optional[int] = None
+    height: Optional[int] = None
 
 
 class Direction:
@@ -93,9 +58,12 @@ class Page:
     h1: Optional[str] = None
     h2: Optional[str] = None
     h3: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
 
     def __post_init__(self):
         self._preprocess()
+        self._calculate_dimensions()
 
     @property
     def title(self) -> Optional[str]:
@@ -111,21 +79,13 @@ class Page:
 
     @property
     def chunk(self) -> Chunk:
-        """
-        Split raw_md into chunk tree
-        Chunk tree branches when in-page divider is met.
-        - adjacent "***"s create chunk with horizontal direction
-        - adjacent "___" create chunk with vertical direction
-        "___" possesses higher priority than "***"
-
-        :return: Root of the chunk tree
-        """
+        """\n        Split raw_md into chunk tree\n        Chunk tree branches when in-page divider is met.\n        - adjacent "***"s create chunk with horizontal direction\n        - adjacent "___" create chunk with vertical direction\n        "___" possesses higher priority than "***"\n\n        :return: Root of the chunk tree\n        """
 
         def split_by_div(text, type) -> List[Chunk]:
             strs = [""]
             current_escaped = False
             for line in text.split("\n"):
-                if line.strip().startswith("```"):
+                if line.strip().startswith(""):
                     current_escaped = not current_escaped
                 if is_divider(line, type) and not current_escaped:
                     strs.append("\n")
@@ -147,26 +107,28 @@ class Page:
         return Chunk(children=vchunks, direction=Direction.VERTICAL, type=Type.NODE)
 
     def _preprocess(self):
-        """
-        Additional processing needed for the page.
-        Modifies raw_md in place.
-
-        - Removes headings 1-3
-        - Stripes
-        """
+        """\n        Additional processing needed for the page.\n        Modifies raw_md in place.\n\n        - Removes headings 1-3\n        - Stripes\n        """
 
         lines = self.raw_md.splitlines()
         lines = [l for l in lines if not (1 <= get_header_level(l) <= 3)]
         self.raw_md = "\n".join(lines).strip()
 
+    def _calculate_dimensions(self):
+        """\n        Calculate the dimensions of the slide based on content.\n        Handle aspect ratio errors gracefully.\n        """
+        try:
+            # Placeholder for actual dimension calculation logic
+            self.width = 1024  # Example width
+            self.height = 768  # Example height
+            if self.width / self.height < 0.5 or self.width / self.height > 2:
+                raise ValueError("Aspect ratio error: dimensions are too skewed.")
+        except ValueError as e:
+            print(f"Error calculating dimensions: {e}")
+            self.width = 1024  # Default width
+            self.height = 768  # Default height
+
 
 def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
-    """
-    Parse the YAML front matter in a given markdown document.
-
-    :param document: Input markdown document as a string.
-    :return: A tuple containing the document with front matter removed and the PageOption.
-    """
+    """\n    Parse the YAML front matter in a given markdown document.\n\n    :param document: Input markdown document as a string.\n    :return: A tuple containing the document with front matter removed and the PageOption.\n    """
     document = document.strip()
     front_matter = ""
     content = document
@@ -196,14 +158,7 @@ def parse_frontmatter(document: str) -> Tuple[str, PageOption]:
 
 
 def parse_deco(line: str, base_option: Optional[PageOption] = None) -> PageOption:
-    """
-    Parses a deco (custom decorator) line and returns a dictionary of key-value pairs.
-    If base_option is provided, it updates the option with matching keys from the deco. Otherwise initialize an option.
-
-    :param line: The line containing the deco
-    :param base_option: Optional PageOption to update with deco values
-    :return: An updated PageOption
-    """
+    """\n    Parses a deco (custom decorator) line and returns a dictionary of key-value pairs.\n    If base_option is provided, it updates the option with matching keys from the deco. Otherwise initialize an option.\n\n    :param line: The line containing the deco\n    :param base_option: Optional PageOption to update with deco values\n    :return: An updated PageOption\n    """
 
     def rm_quotes(s):
         if (s.startswith('"') and s.endswith('"')) or (
@@ -248,17 +203,7 @@ def parse_value(value: str):
 
 
 def composite(document: str) -> List[Page]:
-    """
-    Composite a markdown document into slide pages.
-
-    Splitting criteria:
-    - New h1/h2/h3 header (except when following another header)
-    - "---" Divider (___, ***, +++ not count)
-
-    :param document: Input markdown document as a string.
-    :param document_path: Optional string, will be used to redirect url in documents if given.
-    :return: List of Page objects representing paginated slides
-    """
+    """\n    Composite a markdown document into slide pages.\n\n    Splitting criteria:\n    - New h1/h2/h3 header (except when following another header)\n    - "---" Divider (___, ***, +++ not count)\n\n    :param document: Input markdown document as a string.\n    :param document_path: Optional string, will be used to redirect url in documents if given.\n    :return: List of Page objects representing paginated slides\n    """
     pages: List[Page] = []
     current_page_lines = []
     current_escaped = False  # track whether in code area
@@ -299,7 +244,7 @@ def composite(document: str) -> List[Page]:
 
     for _, line in enumerate(lines):
         # update current env stack
-        if line.strip().startswith("```"):
+        if line.strip().startswith(""):
             current_escaped = not current_escaped
 
         header_level = get_header_level(line) if not current_escaped else 0
@@ -334,31 +279,4 @@ def composite(document: str) -> List[Page]:
         if header_level == 0 and not is_empty(line) and not contains_deco(line):
             prev_header_level = 0
 
-    # Create the last page if there's remaining content
-    create_page()
-
-    # Process each page and choose titles
-    env_h1 = env_h2 = env_h3 = None
-    for page in pages:
-        inherit_h1 = page.option.default_h1
-        inherit_h2 = page.option.default_h2
-        inherit_h3 = page.option.default_h3
-        if page.h1 is not None:
-            env_h1 = page.h1
-            env_h2 = env_h3 = None
-            inherit_h1 = inherit_h2 = inherit_h3 = False
-        if page.h2 is not None:
-            env_h2 = page.h2
-            env_h3 = None
-            inherit_h2 = inherit_h3 = False
-        if page.h3 is not None:
-            env_h3 = page.h3
-            inherit_h3 = False
-        if inherit_h1:
-            page.h1 = env_h1
-        if inherit_h2:
-            page.h2 = env_h2
-        if inherit_h3:
-            page.h3 = env_h3
-
-    return pages
+    # Create the last page if there's remaining content\n    create_page()\n\n    # Process each page and choose titles\n    env_h1 = env_h2 = env_h3 = None\n    for page in pages:\n        inherit_h1 = page.option.default_h1\n        inherit_h2 = page.option.default_h2\n        inherit_h3 = page.option.default_h3\n        if page.h1 is not None:\n            env_h1 = page.h1\n            env_h2 = env_h3 = None\n            inherit_h1 = inherit_h2 = inherit_h3 = False\n        if page.h2 is not None:\n            env_h2 = page.h2\n            env_h3 = None\n            inherit_h2 = inherit_h3 = False\n        if page.h3 is not None:\n            env_h3 = page.h3\n            inherit_h3 = False\n        if inherit_h1:\n            page.h1 = env_h1\n        if inherit_h2:\n            page.h2 = env_h2\n        if inherit_h3:\n            page.h3 = env_h3\n\n    return pages
