@@ -12,25 +12,7 @@ def template_dir(name="base"):
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_test_env():
-    doc = """
----
-resource_dir: "resources"
-default_h1: true
-theme: beam
-background-color: 'red'
----
-# Test page
-Other Pages
-![Image-1](image.png)
----
-Paragraph 1
-===
-Paragraph 2
-<->
-Paragraph 3
-<->
-![Image-2](image2.png)
-    """
+    doc = """\n---\nresource_dir: "resources"\ndefault_h1: true\ntheme: beam\nbackground-color: 'red'\n---\n# Test page\nOther Pages\n![Image-1](image.png)\n---\nParagraph 1\n<!-- Divider -->\nParagraph 2\n<!-- Divider -->\nParagraph 3\n<!-- Divider -->\n![Image-2](image2.png)\n    """
     with tempfile.TemporaryDirectory() as temp_dir:
         # Setup test files and directories
         doc_path = os.path.join(temp_dir, "test.md")
@@ -68,8 +50,6 @@ def test_rendering(setup_test_env):
 
 def test_read_options(setup_test_env):
     _, doc_path, _, _ = setup_test_env
-    # import ipdb; ipdb.set_trace(context=15)
-
     options = read_options(doc_path)
     assert options.default_h1 is True
     assert options.theme == "beam"
@@ -100,19 +80,7 @@ def test_build(setup_test_env):
 
 
 def test_retrieve_structure():
-    doc = """
-# Title
-p0
-## Heading1
-p1
-### Subheading1
-p2
-## Heading2
-### Subheading1
-p3
-# Title2
-p4
-"""
+    doc = """\n# Title\np0\n## Heading1\np1\n### Subheading1\np2\n## Heading2\n### Subheading1\np3\n# Title2\np4\n"""
     pages = composite(doc)
     slide_struct = retrieve_structure(pages)
     headings = slide_struct["headings"]
@@ -134,6 +102,26 @@ p4
         {"h1": "Title", "h2": "Heading2", "h3": "Subheading1"},
         {"h1": "Title2", "h2": None, "h3": None},
     ]
+
+
+def test_custom_decorators():
+    doc = """\n---\ndefault_h1: true\n---\n# Title1\n@(background=blue)\n## Title2\n# Title\n@(default_h1=false)\nHello\n"""
+    pages = composite(doc)
+    assert len(pages) == 2
+    assert pages[0].raw_md == ""
+    assert pages[0].title == "Title1"
+    assert pages[0].subtitle == "Title2"
+    assert pages[0].option.styles == {"background": "blue"}
+    assert pages[0].option.default_h1 is True
+    assert pages[1].option.default_h1 is False
+
+
+def test_comment_removal():
+    doc = """\n# Title\n<!-- This is a comment -->\nContent\n<!-- Another comment -->\n"""
+    pages = composite(doc)
+    assert pages[0].raw_md == "Content"
+    assert pages[0].title == "Title"
+    assert pages[0].subtitle is None
 
 
 if __name__ == "__main__":
